@@ -71,6 +71,12 @@ class Player(sprite.Sprite):
             rover = self.map.get_objects_in(self.map.get_neighbour(self.pos, dir), 0, 'Rover')
             if rover:
                 self.following.add(rover)
+                
+        # check win condition
+        if self.pos == self.map.exit:
+            for follower in self.following:
+                if follower.get_type() == 'Rover':
+                    sys.exit('Yay!')
         
         
     def in_inventory(self, type):

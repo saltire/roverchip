@@ -35,12 +35,9 @@ class Roverchip:
         self.background = pygame.Surface(dims)
         
         # draw background
-        for x, y in self.map.map:
+        for x, y in self.map.colours:
             rect = x * self.tilesize, y * self.tilesize, self.tilesize, self.tilesize
-            if self.map.map[(x, y)] == 1:
-                self.background.fill((0, 0, 0), rect)
-            else:
-                self.background.fill((255, 255, 255), rect)
+            self.background.fill(self.map.colours[(x, y)], rect)
         self.screen.blit(self.background, (0, 0))
 
         # draw sprites
@@ -71,10 +68,6 @@ class Roverchip:
                 elif event.type == VIDEORESIZE:
                     width, height = event.size
                     self.tilesize = min(width / self.map.width, height / self.map.height)
-                    
-                    for sprite in self.map.sprites:
-                        sprite.set_size(self.tilesize)
-                        
                     self.init_screen(event.size)
                     
                 # move controls
