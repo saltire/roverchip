@@ -1,11 +1,11 @@
-import mob
+import sprite
 
-class Mirror(mob.Mob):
+class Mirror(sprite.Sprite):
 
     def __init__(self, map, pos, facing):
-        mob.Mob.__init__(self, map, pos)
+        sprite.Sprite.__init__(self, map, pos)
         self.colour = (128, 128, 255)
-        self.is_pushable = 1
+        self.is_movable = 1
         self.is_solid = 1
         
         # facing = diagonal dir the mirror is facing: 0-3, clockwise from northwest

@@ -1,20 +1,20 @@
 import pygame
 
 import laserbeam
-import mob
+import sprite
 
-class Laser(mob.Mob):
+class Laser(sprite.Sprite):
 
     def __init__(self, map, pos, dir):
-        mob.Mob.__init__(self, map, pos, dir)
+        sprite.Sprite.__init__(self, map, pos, dir)
         self.colour = (192, 64, 0)
-        
         self.is_solid = 1
         
         self.beam = pygame.sprite.RenderUpdates()
 
         
-    def calculate_path(self):
+    def start_turn(self):
+        self.map.sprites.remove(self.map.beams)
         self.map.beams.empty()
         cell = self.pos
         out_dir = self.dir
@@ -26,20 +26,21 @@ class Laser(mob.Mob):
             if out_dir is False:
                 break
                 
-            beam = laserbeam.Laserbeam(cell, (in_dir, out_dir))
+            beam = laserbeam.Laserbeam(self.map, cell, (in_dir, out_dir))
+            self.map.sprites.add(beam, layer='lasers')
             self.map.beams.add(beam)
         
         
     def find_out_dir(self, cell, in_dir):
-        if not self.map.is_empty(cell):
+        if not self.map.is_open(cell):
             return False
         
-        if self.map.is_mob_type_in(cell, 'Mirror'):
-            mirror = self.map.get_mobs_in(cell, 'Mirror')[0]
-            return mirror.get_out_dir(in_dir)
-            
-        for mob in self.map.get_mobs_touching(cell):
-            if mob.is_solid and mob not in self.map.get_mobs_touching(self.map.get_neighbour(cell, in_dir)):
+        mirrors = self.map.get_objects_in(cell, 0, 'Mirror')
+        if mirrors:
+            return mirrors[0].get_out_dir(in_dir)
+        
+        for sprite in self.map.get_solid_objects_in(cell, 1):
+            if sprite not in self.map.enemies and sprite not in self.map.get_solid_objects_in(self.map.get_neighbour(cell, in_dir), 1):
                 return False
         
         return in_dir

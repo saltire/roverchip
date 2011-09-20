@@ -1,28 +1,89 @@
-import mob
+import sys
 
-class Player(mob.Mob):
+import pygame
+
+import sprite
+
+class Player(sprite.Sprite):
     
-    def __init__(self, map, pos, dir=0):
-        mob.Mob.__init__(self, map, pos, dir)
+    def __init__(self, map, pos, facing=0):
+        sprite.Sprite.__init__(self, map, pos, facing)
         self.colour = (0, 0, 255)
         self.speed = 4
         
+        self.following = pygame.sprite.Group()
+        self.pushing = pygame.sprite.Group()
+        self.inv = pygame.sprite.Group()
+        
 
-    def start_move(self, dir):
+    def try_move(self, dir):
         if not self.to_move:
             self.dir = dir
             next = self.map.get_neighbour(self.pos, dir)
-            if next:
-                if self.map.is_empty(next):
-                    pushables = [mob for mob in self.map.get_mobs_in(next) if mob.is_pushable]
-                    if pushables:
-                        next2 = self.map.get_neighbour(next, dir)
-                        if self.map.is_empty(next2) and not [mob for mob in self.map.get_mobs_touching(next2) if mob.is_solid or mob.is_enemy]:
-                            self.to_move = 1
-                            pushables[0].speed = self.speed
-                            pushables[0].dir = dir
-                            pushables[0].to_move = 1
+            # check if the sqaure to move to exists and can be moved into
+            if next and self.map.is_open(next):
+                door = self.map.get_objects_in(next, 0, 'Door')
+                key = self.in_inventory('Key')
+                if door and key:
+                    door[0].kill()
+                    key[0].kill()
+                
+                # check if the square contains a movable object and if there is room to push it
+                movables = self.map.get_movables_in(next)
+                next2 = self.map.get_neighbour(next, dir)
+                if movables and self.map.is_open(next2) and not self.map.get_solid_objects_in(next2, 1) and not self.map.get_enemies_in(next2, 1):
+                    self.pushing.add(movables)
+                    self.start_move()
                         
-                    elif not [mob for mob in self.map.get_mobs_in(next) if mob.is_solid and not mob.is_enemy]:
-                        self.to_move = 1
+                # check that the square does not contain any immovable objects
+                elif not self.map.get_solid_objects_in(next):
+                    self.start_move()
+                    
+                    
+    def start_move(self):
+        self.last_pos = self.pos
+        self.to_move = 1
+        
+        # also move items in inventory
+        for item in set(self.pushing.sprites() + self.inv.sprites()):
+            item.speed = self.speed
+            item.dir = self.dir
+            item.to_move = 1
+            
+        # move rover
+        for follower in self.following.sprites():
+            follower.speed = self.speed
+            follower.dir = self.map.get_dir(follower.pos, self.pos)
+            follower.to_move = 1
     
+    
+    def after_move(self):
+        # pick up items
+        for item in self.map.get_items_in(self.pos):
+            if not self.inv.has(item):
+                self.inv.add(item)
+            
+        # stop pushing objects
+        self.pushing.empty()
+        
+        # check for rover
+        for dir in range(4):
+            rover = self.map.get_objects_in(self.map.get_neighbour(self.pos, dir), 0, 'Rover')
+            if rover:
+                self.following.add(rover)
+        
+        
+    def in_inventory(self, type):
+        return [item for item in self.inv if item.get_type() == type]
+            
+            
+    def check_collisions(self):
+        if self.pos in [pos for shooter in self.map.get_objects('Shooter') for pos in shooter.path]:
+            self.kill()
+
+        if pygame.sprite.spritecollideany(self, self.map.beams) or pygame.sprite.spritecollideany(self, self.map.enemies):
+            self.kill()
+            
+        if not self.alive():
+            sys.exit()
+            

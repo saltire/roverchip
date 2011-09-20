@@ -1,22 +1,32 @@
-import mob
+import pygame
 
-class Robot(mob.Mob):
+import sprite
 
-    def __init__(self, map, pos, dir=0):
-        mob.Mob.__init__(self, map, pos, dir)
+class Robot(sprite.Sprite):
+
+    def __init__(self, map, pos, dir=0, follow=0):
+        sprite.Sprite.__init__(self, map, pos, dir)
         self.colour = (255, 0, 0)
         self.speed = 1.5
+        self.is_enemy = 1
         
-        self.is_solid = 1
+        self.follow = follow # 0 = left wall, 1 = right wall
         
     
-    def start_move(self):
+    def start_turn(self):
         if not self.to_move:
             for t in range(4):
-                dir = (self.dir - 1 + t) % 4
+                dir = (self.dir + ((1 - t) if self.follow else (t - 1))) % 4
                 next = self.map.get_neighbour(self.pos, dir)
-                if self.map.is_empty(next) and not [mob for mob in self.map.get_mobs_touching(next) if mob.is_solid]:
+                if (self.map.is_open(next)
+                    and not self.map.get_solid_objects_in(next)
+                    and next not in [beam.pos for beam in self.map.beams]
+                    ):
                     self.dir = dir
                     self.to_move = 1
                     break
-                           
+
+
+    def check_collisions(self):
+        if pygame.sprite.spritecollideany(self, self.map.beams):
+            self.kill()
