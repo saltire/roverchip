@@ -91,5 +91,5 @@ class Player(sprite.Sprite):
             self.kill()
             
         if not self.alive():
-            sys.exit()
+            sys.exit('Ouch!')
             

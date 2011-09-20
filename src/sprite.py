@@ -60,11 +60,12 @@ class Sprite(pygame.sprite.Sprite):
                 self.after_move()
         
         
-    def update(self, tilesize):
+    def update(self, tilesize, offset):
         # either initialize image and rect, or just update rect
         x, y = self.pos
-        left = (x + (1 - self.size) / 2) * tilesize
-        top = (y + (1 - self.size) / 2) * tilesize
+        ox, oy = offset
+        left = (x + (1 - self.size) / 2) * tilesize - ox
+        top = (y + (1 - self.size) / 2) * tilesize - oy
         size = tilesize * self.size
         
         if not hasattr(self, 'image') or tilesize != self.image.get_width():

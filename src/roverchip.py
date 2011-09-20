@@ -19,33 +19,60 @@ class Roverchip:
 
         # init map
         self.map = map.Map()
-        self.tilesize = 75
-        dims = self.map.width * self.tilesize, self.map.height * self.tilesize
-        
-        # init screen
-        self.init_screen(dims)
+
+        # init window
+        tilesize = 75
+        self.viewsize = (10, 6)
+        vw, vh = self.viewsize
+        self.init_window((vw * tilesize, vh * tilesize))
         
         # start loop
         self.loop()
         
         
-    def init_screen(self, dims):
+    def init_window(self, (width, height)):
         # init window and background
-        self.screen = pygame.display.set_mode(dims, RESIZABLE)
-        self.background = pygame.Surface(dims)
+        self.window = pygame.display.set_mode((width, height), RESIZABLE)
+        self.window.fill((0, 0, 0))
         
-        # draw background
+        # init screen of proper size within the window
+        vw, vh = self.viewsize
+        self.tilesize = min(width / vw, height / vh)
+        self.width, self.height = vw * self.tilesize, vh * self.tilesize
+        self.left, self.top = int((width - self.width) / 2), int((height - self.height) / 2)
+        self.view = self.window.subsurface((self.left, self.top, self.width, self.height))
+
+        # init background
+        self.background = pygame.Surface((self.map.width * self.tilesize, self.map.height * self.tilesize))
         for x, y in self.map.colours:
             rect = x * self.tilesize, y * self.tilesize, self.tilesize, self.tilesize
             self.background.fill(self.map.colours[(x, y)], rect)
-        self.screen.blit(self.background, (0, 0))
+            
+        # draw background
+        left, top = self.find_offset()
+        self.view.blit(self.background, (0, 0), (left, top, self.width, self.height))
 
         # draw sprites
-        self.map.sprites.update(self.tilesize)
-        self.map.sprites.draw(self.screen)
+        self.map.sprites.update(self.tilesize, (left, top))
+        self.map.sprites.draw(self.view)
 
         # update display
         pygame.display.update()
+        
+        
+    def find_offset(self):
+        px, py = self.map.get_objects('Player')[0].pos
+        vw, vh = self.viewsize
+        
+        # find offset that places the player in the centre
+        ox = px - (vw - 1) / 2.0
+        oy = py - (vh - 1) / 2.0
+        
+        # clamp values so as not to go off the edge
+        left = max(0, min(ox, self.map.width - vw))
+        top = max(0, min(oy, self.map.height - vh))
+        
+        return int(left * self.tilesize), int(top * self.tilesize)
 
         
     def loop(self):
@@ -66,9 +93,7 @@ class Roverchip:
                 
                 # resize window
                 elif event.type == VIDEORESIZE:
-                    width, height = event.size
-                    self.tilesize = min(width / self.map.width, height / self.map.height)
-                    self.init_screen(event.size)
+                     self.init_window(event.size)
                     
                 # move controls
                 elif event.type == KEYDOWN:
@@ -77,23 +102,22 @@ class Roverchip:
                             player.try_move(dirkeys.index(event.key))
                             
                             
-            # clear and update sprites
-            self.map.sprites.clear(self.screen, self.background)
-            
             # execute frame for all sprites in layer order
             for sprite in self.map.sprites.sprites():
                 sprite.do_turn(elapsed)
             
-            # update positions, check for collisions
-            self.map.sprites.update(self.tilesize)
+            # get offset and draw background
+            left, top = self.find_offset()
+            self.view.blit(self.background, (0, 0), (left, top, self.width, self.height))
+
+            # update sprite positions, check for collisions, draw sprites
+            self.map.sprites.update(self.tilesize, (left, top))
             for sprite in self.map.sprites.sprites():
                 sprite.check_collisions()
-                
-            # draw sprites
-            updates = self.map.sprites.draw(self.screen)
+            self.map.sprites.draw(self.view)
 
             # update display
-            pygame.display.update(updates)
+            pygame.display.update()
 
 
 if __name__ == '__main__':
