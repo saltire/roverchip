@@ -18,7 +18,7 @@ class Robot(sprite.Sprite):
             for t in range(4):
                 dir = (self.dir + ((1 - t) if self.follow else (t - 1))) % 4
                 next = self.map.get_neighbour(self.pos, dir)
-                if (self.map.is_open(next)
+                if (self.map.can_robot_enter(next)
                     and not self.map.get_solid_objects_in(next)
                     and next not in [beam.pos for beam in self.map.beams]
                     ):

@@ -1,3 +1,4 @@
+import sunkencrate
 import sprite
 
 class Crate(sprite.Sprite):
@@ -8,3 +9,10 @@ class Crate(sprite.Sprite):
         self.is_movable = 1
         self.is_solid = 1
         
+        
+    def after_move(self):
+        if self.map.is_water(self.pos):
+            self.kill()
+            sunken = sunkencrate.SunkenCrate(self.map, self.pos)
+            self.map.sprites.add(sunken)
+            sunken.after_move()

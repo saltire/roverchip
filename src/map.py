@@ -4,6 +4,7 @@ import crate
 import door
 import key
 import laser
+import levels
 import mirror
 import player
 import robot
@@ -12,40 +13,14 @@ import shooter
 
 class Map:
     
-    def __init__(self):
-        mapdata = ['0000000000000000000000',
-                   '0111111111111111110000',
-                   '0122210000000000010000',
-                   '0122210000000000000000',
-                   '0122000000000000010000',
-                   '0100010000000000010000',
-                   '0102210000000000010000',
-                   '0111111111111111112000',
-                   '0000000000000000000000']
-        
-        objects = {
-            'exit': (0, 8),
-            'player': (0, 8),
-            'rover': (2, 6),
-            'robots': [],
-            'shooters': [((9, 6), 0), ((10, 6), 0), ((11, 6), 0), ((12, 6), 0), ((13, 6), 0), ((14, 6), 0), ((15, 6), 0), ((16, 4), 3), ((16, 5), 3), ((21, 6), 3)],
-            'crates': [],
-            'lasers': [((7, 6), 0)],
-            'mirrors': [((7, 3), 2), ((20, 1), 3), ((19, 7), 1)],
-            'keys': [(18, 6)],
-            'doors': [((5, 4), 1)]
-        }
+    def __init__(self, num):
+        level = levels.Levels()
+        mapdata, objects = level.levels[num]
 
         self.height = len(mapdata)
         self.width = len(mapdata[0])
         
         self.exit = objects['exit']
-        
-        colours = [
-            (255, 255, 255),
-            (0, 0, 0),
-            (64, 64, 64)
-            ]
         
         # init map
         self.map = {}
@@ -53,15 +28,15 @@ class Map:
         for y in range(self.height):
             for x in range(self.width):
                 self.map[x, y] = int(mapdata[y][x])
-                self.colours[x, y] = colours[int(mapdata[y][x])]
+                self.colours[x, y] = level.colours[int(mapdata[y][x])]
 
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()
         
         self.sprites.add(rover.Rover(self, objects['rover']))
         self.sprites.add(player.Player(self, objects['player']))
-        for pos, facing in objects['robots']:
-            self.sprites.add(robot.Robot(self, pos, facing))
+        for pos, facing, follow in objects['robots']:
+            self.sprites.add(robot.Robot(self, pos, facing, follow))
         for pos, facing in objects['shooters']:
             self.sprites.add(shooter.Shooter(self, pos, facing))
         for pos in objects['crates']:
@@ -102,11 +77,19 @@ class Map:
             return 3
     
     
-    def is_open(self, cell):
-        return True if (
-            cell in self.map
-            and self.map[cell] == 0
-            ) else False
+    def can_player_enter(self, cell):
+        return cell in self.map and (
+            self.map[cell] in [0, 8]
+            or self.map[cell] == 3 and self.get_objects_in(cell, 0, 'SunkenCrate')
+            )
+    
+    
+    def can_robot_enter(self, cell):
+        return cell in self.map and self.map[cell] in [0]
+    
+    
+    def can_object_enter(self, cell):
+        return cell in self.map and self.map[cell] in [0, 2, 3, 4, 5, 6, 7, 8]
             
             
     def get_objects(self, *types):
@@ -138,8 +121,12 @@ class Map:
     
     def get_items_in(self, cell, touching=0):
         return [sprite for sprite in self.get_objects_in(cell, touching) if sprite.is_item]
-    
-    
-    def get_beams(self):
-        return [beam.pos for beam in self.beams]
 
+
+    def is_water(self, cell):
+        return self.map[cell] in [3, 4, 5, 6, 7]
+
+
+    def get_water_dir(self, cell):
+        if self.map[cell] in [4, 5, 6, 7]:
+            return self.map[cell] - 4

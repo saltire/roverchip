@@ -32,7 +32,7 @@ class Laser(sprite.Sprite):
         
         
     def find_out_dir(self, cell, in_dir):
-        if not self.map.is_open(cell):
+        if not self.map.can_object_enter(cell):
             return False
         
         mirrors = self.map.get_objects_in(cell, 0, 'Mirror')

@@ -21,7 +21,7 @@ class Player(sprite.Sprite):
             self.dir = dir
             next = self.map.get_neighbour(self.pos, dir)
             # check if the sqaure to move to exists and can be moved into
-            if next and self.map.is_open(next):
+            if next and self.map.can_player_enter(next):
                 door = self.map.get_objects_in(next, 0, 'Door')
                 key = self.in_inventory('Key')
                 if door and key:
@@ -31,7 +31,7 @@ class Player(sprite.Sprite):
                 # check if the square contains a movable object and if there is room to push it
                 movables = self.map.get_movables_in(next)
                 next2 = self.map.get_neighbour(next, dir)
-                if movables and self.map.is_open(next2) and not self.map.get_solid_objects_in(next2, 1) and not self.map.get_enemies_in(next2, 1):
+                if movables and self.map.can_object_enter(next2) and not self.map.get_solid_objects_in(next2, 1) and not self.map.get_enemies_in(next2, 1):
                     self.pushing.add(movables)
                     self.start_move()
                         

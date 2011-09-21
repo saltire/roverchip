@@ -17,7 +17,7 @@ class Shooter(sprite.Sprite):
         cell = self.pos
         while 1:
             cell = self.map.get_neighbour(cell, self.dir)
-            if not cell or not self.map.is_open(cell) or self.map.get_solid_objects_in(cell):
+            if not cell or not self.can_object_enter(cell) or self.map.get_solid_objects_in(cell):
                 break
             self.path.append(cell)
 
