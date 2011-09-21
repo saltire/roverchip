@@ -57,6 +57,9 @@ class Map:
         self.beams = pygame.sprite.Group()
         
         
+    # cell data
+        
+        
     def get_neighbour(self, (x, y), *dirs):
         neighbours = [(x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y)]
         dirs = dirs or [0, 1, 2, 3]
@@ -75,23 +78,11 @@ class Map:
             return 2
         if x2 < x1:
             return 3
+        
+        
+    # sprite data
     
     
-    def can_player_enter(self, cell):
-        return cell in self.map and (
-            self.map[cell] in [0, 8]
-            or self.map[cell] == 3 and self.get_objects_in(cell, 0, 'SunkenCrate')
-            )
-    
-    
-    def can_robot_enter(self, cell):
-        return cell in self.map and self.map[cell] in [0]
-    
-    
-    def can_object_enter(self, cell):
-        return cell in self.map and self.map[cell] in [0, 2, 3, 4, 5, 6, 7, 8]
-            
-            
     def get_objects(self, *types):
         return [sprite for sprite in self.sprites if sprite.get_type() in types or not types]
             
@@ -121,12 +112,34 @@ class Map:
     
     def get_items_in(self, cell, touching=0):
         return [sprite for sprite in self.get_objects_in(cell, touching) if sprite.is_item]
+    
+    
+    # boolean tests
+    
+    
+    def can_player_enter(self, cell):
+        return cell in self.map and (
+            self.map[cell] in [0, 8]
+            or self.is_water(cell) and self.get_objects_in(cell, 0, 'SunkenCrate')
+            )
+    
+    
+    def can_robot_enter(self, cell):
+        return cell in self.map and self.map[cell] == 0
+    
+    
+    def can_object_enter(self, cell):
+        return cell in self.map and self.map[cell] in [0, 2, 3, 4, 5, 6, 7, 8]
+            
+            
+    def is_fire(self, cell):
+        return cell in self.map and self.map[cell] == 2
 
 
     def is_water(self, cell):
-        return self.map[cell] in [3, 4, 5, 6, 7]
+        return cell in self.map and self.map[cell] in [3, 4, 5, 6, 7]
 
 
     def get_water_dir(self, cell):
-        if self.map[cell] in [4, 5, 6, 7]:
+        if cell in self.map and self.map[cell] in [4, 5, 6, 7]:
             return self.map[cell] - 4
