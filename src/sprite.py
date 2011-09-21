@@ -11,7 +11,6 @@ class Sprite(pygame.sprite.Sprite):
         self.map = map
         self.pos = pos
         self.dir = dir
-        
         self.to_move = 0
         self.dead = 0
         
@@ -19,10 +18,11 @@ class Sprite(pygame.sprite.Sprite):
         self.colour = (0, 0, 0)
         self.size = 1
         self.speed = 1
-        self.is_movable = 0
-        self.is_solid = 0
-        self.is_enemy = 0
-        self.is_item = 0
+        self.is_movable = 0         # can be pushed by player
+        self.is_solid = 0           # will stop things from entering its square
+        self.is_enemy = 0           # will kill player on touch
+        self.is_item = 0            # can be picked up by player
+        self.is_destructible = 0    # will be destroyed by laserbeams
         
         
     def get_type(self):

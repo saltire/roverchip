@@ -18,7 +18,7 @@ class Roverchip:
         pygame.key.set_repeat(1, 50)
 
         # init map
-        self.map = map.Map(2)
+        self.map = map.Map(3)
 
         # init window
         tilesize = 75

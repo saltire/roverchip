@@ -10,6 +10,7 @@ class Player(sprite.Sprite):
         sprite.Sprite.__init__(self, map, pos, facing)
         self.colour = (0, 0, 255)
         self.speed = 4
+        self.is_destructible = 1
         
         self.following = pygame.sprite.Group()
         self.pushing = pygame.sprite.Group()
@@ -46,7 +47,7 @@ class Player(sprite.Sprite):
         
         # also move items in inventory
         for item in set(self.pushing.sprites() + self.inv.sprites()):
-            item.speed = self.speed
+            item.speed = max(item.speed, self.speed)
             item.dir = self.dir
             item.to_move = 1
             
@@ -87,7 +88,7 @@ class Player(sprite.Sprite):
         if self.pos in [pos for shooter in self.map.get_objects('Shooter') for pos in shooter.path]:
             self.kill()
 
-        if pygame.sprite.spritecollideany(self, self.map.beams) or pygame.sprite.spritecollideany(self, self.map.enemies):
+        if pygame.sprite.spritecollideany(self, self.map.enemies):
             self.kill()
             
         if not self.alive():

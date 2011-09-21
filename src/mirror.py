@@ -17,5 +17,13 @@ class Mirror(sprite.Sprite):
         # we want to know if the mirror is facing the opposite of in_dir
         # so let's reverse in_dir and see if it's one of the mirror's two dirs
         in_dir = (in_dir + 2) % 4
-        
         return self.dirs[(self.dirs.index(in_dir) + 1) % 2] if in_dir in self.dirs else False
+    
+    
+    def after_move(self):
+        if self.map.is_fire(self.pos):
+            self.to_move = 1
+
+        elif self.map.is_water(self.pos) and not self.map.get_objects_in(self.pos, 0, 'SunkenCrate'):
+            self.kill()
+        

@@ -1,5 +1,6 @@
 import pygame
 
+import ball
 import crate
 import door
 import key
@@ -33,26 +34,27 @@ class Map:
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()
         
-        self.sprites.add(rover.Rover(self, objects['rover']))
-        self.sprites.add(player.Player(self, objects['player']))
-        for pos, facing, follow in objects['robots']:
+        self.sprites.add(rover.Rover(self, objects['rover']), layer='player')
+        self.sprites.add(player.Player(self, objects['player']), layer='player')
+        for pos, facing, follow in objects.get('robots', []):
             self.sprites.add(robot.Robot(self, pos, facing, follow))
-        for pos, facing in objects['shooters']:
+        for pos, facing in objects.get('shooters', []):
             self.sprites.add(shooter.Shooter(self, pos, facing))
-        for pos in objects['crates']:
+        for pos in objects.get('crates', []):
             self.sprites.add(crate.Crate(self, pos))
-        for pos, facing in objects['lasers']:
-            self.sprites.add(laser.Laser(self, pos, facing), layer='lasers')
-        for pos, facing in objects['mirrors']:
+        for pos in objects.get('balls', []):
+            self.sprites.add(ball.Ball(self, pos))
+        for pos, facing in objects.get('lasers', []):
+            self.sprites.add(laser.Laser(self, pos, facing))
+        for pos, facing in objects.get('mirrors', []):
             self.sprites.add(mirror.Mirror(self, pos, facing))
-        for pos in objects['keys']:
-            self.sprites.add(key.Key(self, pos))
-        for pos, facing in objects['doors']:
+        for pos in objects.get('keys', []):
+            self.sprites.add(key.Key(self, pos), layer='items')
+        for pos, facing in objects.get('doors', []):
             self.sprites.add(door.Door(self, pos, facing))
             
-        self.solid_objects = pygame.sprite.Group([sprite for sprite in self.sprites if sprite.is_solid])
-        self.movables = pygame.sprite.Group([sprite for sprite in self.sprites if sprite.is_movable])
-        self.items = pygame.sprite.Group([sprite for sprite in self.sprites if sprite.is_item])
+        # groups used for collisions
+        self.destructibles = pygame.sprite.Group([sprite for sprite in self.sprites if sprite.is_destructible])
         self.enemies = pygame.sprite.Group([sprite for sprite in self.sprites if sprite.is_enemy])
         self.beams = pygame.sprite.Group()
         
@@ -125,7 +127,10 @@ class Map:
     
     
     def can_robot_enter(self, cell):
-        return cell in self.map and self.map[cell] == 0
+        return cell in self.map and (
+            self.map[cell] == 0
+            or self.is_water(cell) and self.get_objects_in(cell, 0, 'SunkenCrate')
+            )
     
     
     def can_object_enter(self, cell):

@@ -1,5 +1,3 @@
-import pygame
-
 import sprite
 
 class Robot(sprite.Sprite):
@@ -9,6 +7,7 @@ class Robot(sprite.Sprite):
         self.colour = (255, 0, 0)
         self.speed = 1.5
         self.is_enemy = 1
+        self.is_destructible = 1
         
         self.follow = follow # 0 = left wall, 1 = right wall
         
@@ -26,7 +25,3 @@ class Robot(sprite.Sprite):
                     self.to_move = 1
                     break
 
-
-    def check_collisions(self):
-        if pygame.sprite.spritecollideany(self, self.map.beams):
-            self.kill()
