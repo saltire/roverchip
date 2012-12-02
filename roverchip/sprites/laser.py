@@ -35,15 +35,15 @@ class Laser(sprite.Sprite):
         
         
     def find_out_dir(self, cell, in_dir):
-        if not self.map.can_object_enter(cell):
+        if not self.map.can_sprite_enter(cell):
             return False
         
-        mirrors = self.map.get_objects_in(cell, 0, 'Mirror')
+        mirrors = self.map.get_sprites_in(cell, 0, 'Mirror')
         if mirrors:
             return mirrors[0].get_out_dir(in_dir)
         
-        for sprite in self.map.get_solid_objects_in(cell, 1):
-            if not sprite.is_destructible and sprite not in self.map.get_solid_objects_in(self.map.get_neighbour(cell, in_dir), 1):
+        for sprite in self.map.get_solid_sprites_in(cell, 1):
+            if not sprite.is_destructible and sprite not in self.map.get_solid_sprites_in(self.map.get_neighbour(cell, in_dir), 1):
                 return False
         
         return in_dir

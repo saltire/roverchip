@@ -3,7 +3,7 @@ import sys
 import pygame
 from pygame.locals import *
 
-import map
+import levelfile
 
 
 class Roverchip:
@@ -18,7 +18,8 @@ class Roverchip:
         pygame.key.set_repeat(1, 50)
 
         # init map
-        self.map = map.Map(0)
+        self.levels = levelfile.LevelFile(levelpath).get_levels()
+        self.map = self.levels[0]
 
         # init window
         tilesize = 75
@@ -44,9 +45,9 @@ class Roverchip:
 
         # init background
         self.background = pygame.Surface((self.map.width * self.tilesize, self.map.height * self.tilesize))
-        for x, y in self.map.colours:
+        for (x, y), celltype in self.map.map.items():
             rect = x * self.tilesize, y * self.tilesize, self.tilesize, self.tilesize
-            self.background.fill(self.map.colours[(x, y)], rect)
+            self.background.fill(self.map.colours[celltype], rect)
             
         # draw background
         left, top = self.find_offset()
@@ -61,7 +62,7 @@ class Roverchip:
         
         
     def find_offset(self):
-        px, py = self.map.get_objects('Player')[0].pos
+        px, py = self.map.player.pos
         vw, vh = self.viewsize
         
         # find offset that places the player in the centre
@@ -98,8 +99,7 @@ class Roverchip:
                 # move controls
                 elif event.type == KEYDOWN:
                     if event.key in dirkeys:
-                        for player in self.map.get_objects('Player'):
-                            player.try_move(dirkeys.index(event.key))
+                        self.map.player.try_move(dirkeys.index(event.key))
                             
                             
             # execute frame for all sprites in layer order

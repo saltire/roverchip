@@ -13,9 +13,9 @@ class Ball(sprite.Sprite):
     def after_move(self):
         next = self.map.get_neighbour(self.pos, self.dir)
 
-        if self.map.is_water(self.pos) and not self.map.get_objects_in(self.pos, 0, 'SunkenCrate'):
+        if self.map.is_water(self.pos) and not self.map.get_sprites_in(self.pos, 0, 'SunkenCrate'):
             self.kill()
         
-        elif self.map.can_object_enter(next) and not self.map.get_solid_objects_in(next):
+        elif self.map.can_sprite_enter(next) and not self.map.get_solid_sprites_in(next):
             self.to_move = 1
             

@@ -1,50 +1,57 @@
 import pygame
 
-import levels
 from sprites import *
 
 
-class Map:
-    def __init__(self, num):
-        level = levels.Levels()
-        mapdata, objects = level.levels[num]
+class Level:
+    colours = [
+               (255, 255, 255),    # 0 - floor
+               (0, 0, 0),          # 1 - wall
+               (64, 64, 64),       # 2 - fire
+               (0, 128, 255),      # 3 - water
+               (0, 128, 255),      # 4 - water n
+               (0, 128, 255),      # 5 - water e
+               (0, 128, 255),      # 6 - water s
+               (0, 128, 255),      # 7 - water w
+               (192, 192, 192)     # 8 - grate
+               ]
 
+    
+    def __init__(self, mapdata, sprites):
         self.height = len(mapdata)
         self.width = len(mapdata[0])
         
-        self.exit = objects['exit']
+        self.exit = sprites['exit'][0]
         
         # init map
         self.map = {}
-        self.colours = {}
         for y in range(self.height):
             for x in range(self.width):
                 self.map[x, y] = int(mapdata[y][x])
-                self.colours[x, y] = level.colours[int(mapdata[y][x])]
 
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()
         
-        self.player = player.Player(self, objects['player'])
-        self.rover = rover.Rover(self, objects['rover'])
+        self.player = player.Player(self, sprites['player'][0])
+        self.rover = rover.Rover(self, sprites['rover'][0])
         self.sprites.add(self.player, layer=1)
         self.sprites.add(self.rover, layer=1)
-        for pos, facing, follow in objects.get('robots', []):
-            self.sprites.add(robot.Robot(self, pos, facing, follow))
-        for pos, facing in objects.get('shooters', []):
-            self.sprites.add(shooter.Shooter(self, pos, facing))
-        for pos in objects.get('crates', []):
-            self.sprites.add(crate.Crate(self, pos))
-        for pos in objects.get('balls', []):
-            self.sprites.add(ball.Ball(self, pos))
-        for pos, facing in objects.get('lasers', []):
-            self.sprites.add(laser.Laser(self, pos, facing), layer=3)
-        for pos, facing in objects.get('mirrors', []):
-            self.sprites.add(mirror.Mirror(self, pos, facing))
-        for pos in objects.get('keys', []):
-            self.sprites.add(key.Key(self, pos), layer=2)
-        for pos, facing in objects.get('doors', []):
-            self.sprites.add(door.Door(self, pos, facing))
+        for x, y in sprites.get('ball', []):
+            self.sprites.add(ball.Ball(self, (x, y)))
+        for x, y in sprites.get('crate', []):
+            self.sprites.add(crate.Crate(self, (x, y)))
+        for x, y, facing in sprites.get('door', []):
+            self.sprites.add(door.Door(self, (x, y), facing))
+        for x, y in sprites.get('key', []):
+            self.sprites.add(key.Key(self, (x, y)), layer=2)
+        for x, y, facing in sprites.get('laser', []):
+            self.sprites.add(laser.Laser(self, (x, y), facing), layer=3)
+        for x, y, facing, follow in sprites.get('robot', []):
+            self.sprites.add(robot.Robot(self, (x, y), facing, follow))
+        for x, y, facing in sprites.get('mirror', []):
+            self.sprites.add(mirror.Mirror(self, (x, y), facing))
+        for x, y, facing in sprites.get('shooter', []):
+            self.sprites.add(shooter.Shooter(self, (x, y), facing))
             
         # groups used for collisions
         self.destructibles = pygame.sprite.Group([sprite for sprite in self.sprites if sprite.is_destructible])
@@ -78,11 +85,11 @@ class Map:
     # sprite data
     
     
-    def get_objects(self, *types):
+    def get_sprites(self, *types):
         return [sprite for sprite in self.sprites if sprite.get_type() in types or not types]
             
             
-    def get_objects_in(self, cell, touching=0, *types):
+    def get_sprites_in(self, cell, touching=0, *types):
         return [sprite for sprite in self.sprites if (
     
                     # test if object is touching cell, or entirely in it, depending on touching flag
@@ -93,20 +100,20 @@ class Map:
                     )]
     
     
-    def get_solid_objects_in(self, cell, touching=0):
-        return [sprite for sprite in self.get_objects_in(cell, touching) if sprite.is_solid]
+    def get_solid_sprites_in(self, cell, touching=0):
+        return [sprite for sprite in self.get_sprites_in(cell, touching) if sprite.is_solid]
     
     
     def get_movables_in(self, cell, touching=0):
-        return [sprite for sprite in self.get_objects_in(cell, touching) if sprite.is_movable]
+        return [sprite for sprite in self.get_sprites_in(cell, touching) if sprite.is_movable]
     
     
     def get_enemies_in(self, cell, touching=0):
-        return [sprite for sprite in self.get_objects_in(cell, touching) if sprite.is_enemy]
+        return [sprite for sprite in self.get_sprites_in(cell, touching) if sprite.is_enemy]
     
     
     def get_items_in(self, cell, touching=0):
-        return [sprite for sprite in self.get_objects_in(cell, touching) if sprite.is_item]
+        return [sprite for sprite in self.get_sprites_in(cell, touching) if sprite.is_item]
     
     
     # boolean tests
@@ -115,18 +122,18 @@ class Map:
     def can_player_enter(self, cell):
         return cell in self.map and (
             self.map[cell] in [0, 8]
-            or self.is_water(cell) and self.get_objects_in(cell, 0, 'SunkenCrate')
+            or self.is_water(cell) and self.get_sprites_in(cell, 0, 'SunkenCrate')
             )
     
     
     def can_robot_enter(self, cell):
         return cell in self.map and (
             self.map[cell] == 0
-            or self.is_water(cell) and self.get_objects_in(cell, 0, 'SunkenCrate')
+            or self.is_water(cell) and self.get_sprites_in(cell, 0, 'SunkenCrate')
             )
     
     
-    def can_object_enter(self, cell):
+    def can_sprite_enter(self, cell):
         return cell in self.map and self.map[cell] in [0, 2, 3, 4, 5, 6, 7, 8]
             
             

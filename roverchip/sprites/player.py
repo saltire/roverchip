@@ -23,7 +23,7 @@ class Player(sprite.Sprite):
             next = self.map.get_neighbour(self.pos, dir)
             # check if the sqaure to move to exists and can be moved into
             if next and self.map.can_player_enter(next):
-                door = self.map.get_objects_in(next, 0, 'Door')
+                door = self.map.get_sprites_in(next, 0, 'Door')
                 key = self.in_inventory('Key')
                 if door and key:
                     door[0].kill()
@@ -32,12 +32,12 @@ class Player(sprite.Sprite):
                 # check if the square contains a movable object and if there is room to push it
                 movables = self.map.get_movables_in(next)
                 next2 = self.map.get_neighbour(next, dir)
-                if movables and self.map.can_object_enter(next2) and not self.map.get_solid_objects_in(next2, 1) and not self.map.get_enemies_in(next2, 1):
+                if movables and self.map.can_sprite_enter(next2) and not self.map.get_solid_sprites_in(next2, 1) and not self.map.get_enemies_in(next2, 1):
                     self.pushing.add(movables)
                     self.start_move()
                         
                 # check that the square does not contain any immovable objects
-                elif not self.map.get_solid_objects_in(next):
+                elif not self.map.get_solid_sprites_in(next):
                     self.start_move()
                     
                     
@@ -69,7 +69,7 @@ class Player(sprite.Sprite):
         
         # check for rover
         for dir in range(4):
-            rover = self.map.get_objects_in(self.map.get_neighbour(self.pos, dir), 0, 'Rover')
+            rover = self.map.get_sprites_in(self.map.get_neighbour(self.pos, dir), 0, 'Rover')
             if rover:
                 self.following.add(rover)
                 
@@ -87,7 +87,7 @@ class Player(sprite.Sprite):
             
             
     def check_collisions(self):
-        if self.pos in [pos for shooter in self.map.get_objects('Shooter') for pos in shooter.path]:
+        if self.pos in [pos for shooter in self.map.get_sprites('Shooter') for pos in shooter.path]:
             self.kill()
 
         if pygame.sprite.spritecollideany(self, self.map.enemies):

@@ -10,6 +10,6 @@ class SunkenCrate(sprite.Sprite):
         
     def after_move(self):
         dir = self.map.get_water_dir(self.pos)
-        if dir is not None and not self.map.get_objects_in(self.map.get_neighbour(self.pos, dir), 0, 'SunkenCrate'):
+        if dir is not None and not self.map.get_sprites_in(self.map.get_neighbour(self.pos, dir), 0, 'SunkenCrate'):
             self.dir = dir
             self.to_move = 1
