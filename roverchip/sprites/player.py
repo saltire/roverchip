@@ -73,11 +73,13 @@ class Player(sprite.Sprite):
             if rover:
                 self.following.add(rover)
                 
-        # check win condition
+                    
+    def done_level(self):
         if self.pos == self.map.exit:
             for follower in self.following:
                 if follower.get_type() == 'Rover':
-                    sys.exit('Yay!')
+                    return True
+        return False
         
         
     def in_inventory(self, type):
@@ -90,7 +92,4 @@ class Player(sprite.Sprite):
 
         if pygame.sprite.spritecollideany(self, self.map.enemies):
             self.kill()
-            
-        if not self.alive():
-            sys.exit('Ouch!')
             

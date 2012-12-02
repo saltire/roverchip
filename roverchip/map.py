@@ -25,8 +25,10 @@ class Map:
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()
         
-        self.sprites.add(rover.Rover(self, objects['rover']), layer='player')
-        self.sprites.add(player.Player(self, objects['player']), layer='player')
+        self.player = player.Player(self, objects['player'])
+        self.rover = rover.Rover(self, objects['rover'])
+        self.sprites.add(self.player, layer=1)
+        self.sprites.add(self.rover, layer=1)
         for pos, facing, follow in objects.get('robots', []):
             self.sprites.add(robot.Robot(self, pos, facing, follow))
         for pos, facing in objects.get('shooters', []):
@@ -36,11 +38,11 @@ class Map:
         for pos in objects.get('balls', []):
             self.sprites.add(ball.Ball(self, pos))
         for pos, facing in objects.get('lasers', []):
-            self.sprites.add(laser.Laser(self, pos, facing))
+            self.sprites.add(laser.Laser(self, pos, facing), layer=3)
         for pos, facing in objects.get('mirrors', []):
             self.sprites.add(mirror.Mirror(self, pos, facing))
         for pos in objects.get('keys', []):
-            self.sprites.add(key.Key(self, pos), layer='items')
+            self.sprites.add(key.Key(self, pos), layer=2)
         for pos, facing in objects.get('doors', []):
             self.sprites.add(door.Door(self, pos, facing))
             

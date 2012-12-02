@@ -30,7 +30,7 @@ class Laser(sprite.Sprite):
             beam = laserbeam.Laserbeam(self.map, cell, (in_dir, out_dir))
             self.beams.add(beam)
             
-        self.map.sprites.add(self.beams, layer='laserbeams')
+        self.map.sprites.add(self.beams, layer=3)
         self.map.beams.add(self.beams)
         
         

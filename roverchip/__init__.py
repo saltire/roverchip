@@ -5,8 +5,9 @@ from pygame.locals import *
 
 import map
 
+
 class Roverchip:
-    def __init__(self):
+    def __init__(self, levelpath):
         pygame.init()
         
         # init clock
@@ -17,7 +18,7 @@ class Roverchip:
         pygame.key.set_repeat(1, 50)
 
         # init map
-        self.map = map.Map(3)
+        self.map = map.Map(0)
 
         # init window
         tilesize = 75
@@ -113,11 +114,23 @@ class Roverchip:
             self.map.sprites.update(self.tilesize, (left, top))
             for sprite in self.map.sprites.sprites():
                 sprite.check_collisions()
+                
+            # check for death
+            if not self.map.player.alive():
+                sys.exit('Ouch!')
+            if not self.map.rover.alive():
+                sys.exit('Arf!')
+            
+            # check for win condition
+            if self.map.player.done_level():
+                sys.exit('Yay!')
+                
             self.map.sprites.draw(self.view)
 
             # update display
             pygame.display.update()
 
 
+
 if __name__ == '__main__':
-    Roverchip()
+    Roverchip('levels.txt')
