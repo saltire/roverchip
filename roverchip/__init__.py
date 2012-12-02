@@ -19,7 +19,7 @@ class Roverchip:
 
         # init map
         self.levels = levelfile.LevelFile(levelpath).get_levels()
-        self.map = self.levels[0]
+        self.level = self.levels[0]
 
         # init window
         tilesize = 75
@@ -44,25 +44,25 @@ class Roverchip:
         self.view = self.window.subsurface((self.left, self.top, self.width, self.height))
 
         # init background
-        self.background = pygame.Surface((self.map.width * self.tilesize, self.map.height * self.tilesize))
-        for (x, y), celltype in self.map.map.items():
+        self.background = pygame.Surface((self.level.width * self.tilesize, self.level.height * self.tilesize))
+        for (x, y), celltype in self.level.map.items():
             rect = x * self.tilesize, y * self.tilesize, self.tilesize, self.tilesize
-            self.background.fill(self.map.colours[celltype], rect)
+            self.background.fill(self.level.colours[celltype], rect)
             
         # draw background
         left, top = self.find_offset()
         self.view.blit(self.background, (0, 0), (left, top, self.width, self.height))
 
         # draw sprites
-        self.map.sprites.update(self.tilesize, (left, top))
-        self.map.sprites.draw(self.view)
+        self.level.sprites.update(self.tilesize, (left, top))
+        self.level.sprites.draw(self.view)
 
         # update display
         pygame.display.update()
         
         
     def find_offset(self):
-        px, py = self.map.player.pos
+        px, py = self.level.player.pos
         vw, vh = self.viewsize
         
         # find offset that places the player in the centre
@@ -70,8 +70,8 @@ class Roverchip:
         oy = py - (vh - 1) / 2.0
         
         # clamp values so as not to go off the edge
-        left = max(0, min(ox, self.map.width - vw))
-        top = max(0, min(oy, self.map.height - vh))
+        left = max(0, min(ox, self.level.width - vw))
+        top = max(0, min(oy, self.level.height - vh))
         
         return int(left * self.tilesize), int(top * self.tilesize)
 
@@ -99,11 +99,11 @@ class Roverchip:
                 # move controls
                 elif event.type == KEYDOWN:
                     if event.key in dirkeys:
-                        self.map.player.try_move(dirkeys.index(event.key))
+                        self.level.player.try_move(dirkeys.index(event.key))
                             
                             
             # execute frame for all sprites in layer order
-            for sprite in self.map.sprites.sprites():
+            for sprite in self.level.sprites.sprites():
                 sprite.do_turn(elapsed)
             
             # get offset and draw background
@@ -111,21 +111,21 @@ class Roverchip:
             self.view.blit(self.background, (0, 0), (left, top, self.width, self.height))
 
             # update sprite positions, check for collisions, draw sprites
-            self.map.sprites.update(self.tilesize, (left, top))
-            for sprite in self.map.sprites.sprites():
+            self.level.sprites.update(self.tilesize, (left, top))
+            for sprite in self.level.sprites.sprites():
                 sprite.check_collisions()
                 
             # check for death
-            if not self.map.player.alive():
+            if not self.level.player.alive():
                 sys.exit('Ouch!')
-            if not self.map.rover.alive():
+            if not self.level.rover.alive():
                 sys.exit('Arf!')
             
             # check for win condition
-            if self.map.player.done_level():
+            if self.level.player.done_level():
                 sys.exit('Yay!')
                 
-            self.map.sprites.draw(self.view)
+            self.level.sprites.draw(self.view)
 
             # update display
             pygame.display.update()

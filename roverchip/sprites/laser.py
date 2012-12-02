@@ -8,6 +8,7 @@ class Laser(sprite.Sprite):
     def __init__(self, map, pos, dir):
         sprite.Sprite.__init__(self, map, pos, dir)
         self.colour = (192, 64, 0)
+        self.layer = 3
         self.is_solid = 1
         self.is_destructible = 1
         

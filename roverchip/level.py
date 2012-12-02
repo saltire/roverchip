@@ -1,6 +1,6 @@
 import pygame
 
-from sprites import *
+import sprites
 
 
 class Level:
@@ -17,42 +17,31 @@ class Level:
                ]
 
     
-    def __init__(self, mapdata, sprites):
+    def __init__(self, mapdata, spritedata):
         self.height = len(mapdata)
         self.width = len(mapdata[0])
         
-        self.exit = sprites['exit'][0]
+        self.exit = spritedata['exit'][0]
         
         # init map
         self.map = {}
         for y in range(self.height):
             for x in range(self.width):
                 self.map[x, y] = int(mapdata[y][x])
-
+                
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()
         
-        self.player = player.Player(self, sprites['player'][0])
-        self.rover = rover.Rover(self, sprites['rover'][0])
+        self.player = sprites.Player(self, spritedata['player'][0])
+        self.rover = sprites.Rover(self, spritedata['rover'][0])
         self.sprites.add(self.player, layer=1)
         self.sprites.add(self.rover, layer=1)
-        for x, y in sprites.get('ball', []):
-            self.sprites.add(ball.Ball(self, (x, y)))
-        for x, y in sprites.get('crate', []):
-            self.sprites.add(crate.Crate(self, (x, y)))
-        for x, y, facing in sprites.get('door', []):
-            self.sprites.add(door.Door(self, (x, y), facing))
-        for x, y in sprites.get('key', []):
-            self.sprites.add(key.Key(self, (x, y)), layer=2)
-        for x, y, facing in sprites.get('laser', []):
-            self.sprites.add(laser.Laser(self, (x, y), facing), layer=3)
-        for x, y, facing, follow in sprites.get('robot', []):
-            self.sprites.add(robot.Robot(self, (x, y), facing, follow))
-        for x, y, facing in sprites.get('mirror', []):
-            self.sprites.add(mirror.Mirror(self, (x, y), facing))
-        for x, y, facing in sprites.get('shooter', []):
-            self.sprites.add(shooter.Shooter(self, (x, y), facing))
-            
+        
+        for stype in ('ball', 'crate', 'door', 'key', 'laser', 'robot', 'mirror', 'shooter'):
+            for attrs in spritedata.get(stype, []):
+                sprite = getattr(sprites, stype.capitalize())(self, attrs[:2], *attrs[2:])
+                self.sprites.add(sprite, layer=getattr(sprite, 'layer', 0))
+                
         # groups used for collisions
         self.destructibles = pygame.sprite.Group([sprite for sprite in self.sprites if sprite.is_destructible])
         self.enemies = pygame.sprite.Group([sprite for sprite in self.sprites if sprite.is_enemy])

@@ -1,10 +1,10 @@
-import ball
-import crate
-import door
-import key
-import laser
-import mirror
-import player
-import robot
-import rover
-import shooter
+from ball import Ball
+from crate import Crate
+from door import Door
+from key import Key
+from laser import Laser
+from mirror import Mirror
+from player import Player
+from robot import Robot
+from rover import Rover
+from shooter import Shooter
