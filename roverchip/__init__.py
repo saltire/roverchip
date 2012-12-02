@@ -6,7 +6,6 @@ from pygame.locals import *
 import map
 
 class Roverchip:
-    
     def __init__(self):
         pygame.init()
         
@@ -93,7 +92,7 @@ class Roverchip:
                 
                 # resize window
                 elif event.type == VIDEORESIZE:
-                     self.init_window(event.size)
+                    self.init_window(event.size)
                     
                 # move controls
                 elif event.type == KEYDOWN:

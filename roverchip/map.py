@@ -1,19 +1,10 @@
 import pygame
 
-import ball
-import crate
-import door
-import key
-import laser
 import levels
-import mirror
-import player
-import robot
-import rover
-import shooter
+from sprites import *
+
 
 class Map:
-    
     def __init__(self, num):
         level = levels.Levels()
         mapdata, objects = level.levels[num]
