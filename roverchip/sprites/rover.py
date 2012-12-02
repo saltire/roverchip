@@ -6,4 +6,5 @@ class Rover(sprite.Sprite):
         sprite.Sprite.__init__(self, map, pos, facing)
         self.colour = (255, 255, 0)
         self.layer = 1
+        self.is_destructible = 1
         
