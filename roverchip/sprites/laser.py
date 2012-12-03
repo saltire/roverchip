@@ -5,8 +5,8 @@ import sprite
 
 class Laser(sprite.Sprite):
 
-    def __init__(self, map, pos, dir):
-        sprite.Sprite.__init__(self, map, pos, dir)
+    def __init__(self, level, pos, facing):
+        sprite.Sprite.__init__(self, level, pos, facing)
         self.colour = (192, 64, 0)
         self.layer = 3
         self.is_solid = 1
@@ -19,32 +19,32 @@ class Laser(sprite.Sprite):
         for beam in self.beams:
             beam.kill()
         cell = self.pos
-        out_dir = self.dir
+        out_dir = self.facing
         
         while 1:
-            cell = self.map.get_neighbour(cell, out_dir)
+            cell = self.level.get_neighbour(cell, out_dir)
             in_dir = out_dir
             out_dir = self.find_out_dir(cell, in_dir)
             if out_dir is False:
                 break
                 
-            beam = laserbeam.Laserbeam(self.map, cell, (in_dir, out_dir))
+            beam = laserbeam.Laserbeam(self.level, cell, (in_dir, out_dir))
             self.beams.add(beam)
             
-        self.map.sprites.add(self.beams, layer=3)
-        self.map.beams.add(self.beams)
+        self.level.sprites.add(self.beams, layer=3)
+        self.level.beams.add(self.beams)
         
         
     def find_out_dir(self, cell, in_dir):
-        if not self.map.can_sprite_enter(cell):
+        if not self.level.can_object_enter(cell):
             return False
         
-        mirrors = self.map.get_sprites_in(cell, 0, 'Mirror')
+        mirrors = self.level.get_sprites_in(cell, 0, 'Mirror')
         if mirrors:
             return mirrors[0].get_out_dir(in_dir)
         
-        for sprite in self.map.get_solid_sprites_in(cell, 1):
-            if not sprite.is_destructible and sprite not in self.map.get_solid_sprites_in(self.map.get_neighbour(cell, in_dir), 1):
+        for sprite in self.level.get_solid_sprites_in(cell, 1):
+            if not sprite.is_destructible and sprite not in self.level.get_solid_sprites_in(self.level.get_neighbour(cell, in_dir), 1):
                 return False
         
         return in_dir

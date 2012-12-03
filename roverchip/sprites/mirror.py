@@ -2,8 +2,8 @@ import sprite
 
 class Mirror(sprite.Sprite):
 
-    def __init__(self, map, pos, facing):
-        sprite.Sprite.__init__(self, map, pos)
+    def __init__(self, level, pos, facing):
+        sprite.Sprite.__init__(self, level, pos)
         self.colour = (128, 128, 255)
         self.is_movable = 1
         self.is_solid = 1
@@ -21,9 +21,9 @@ class Mirror(sprite.Sprite):
     
     
     def after_move(self):
-        if self.map.is_type(self.pos, 'fire'):
+        if self.level.is_type(self.pos, 'fire'):
             self.to_move = 1
 
-        elif self.map.is_water(self.pos) and not self.map.get_sprites_in(self.pos, 0, 'SunkenCrate'):
+        elif self.level.is_water(self.pos) and not self.level.get_sprites_in(self.pos, 0, 'SunkenCrate'):
             self.kill()
         

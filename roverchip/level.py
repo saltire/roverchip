@@ -53,10 +53,10 @@ class Level:
         return self.cells[self.map[x, y]][1]
         
         
-    def get_neighbour(self, (x, y), *dirs):
+    def get_neighbour(self, (x, y), *ndirs):
         neighbours = [(x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y)]
-        dirs = dirs or [0, 1, 2, 3]
-        cells = [neighbours[dir] for dir in dirs if neighbours[dir] in self.map]
+        ndirs = ndirs or [0, 1, 2, 3]
+        cells = [neighbours[ndir] for ndir in ndirs if neighbours[ndir] in self.map]
         return cells if len(cells) > 1 else cells[0] if len(cells) == 1 else None
     
     
@@ -124,7 +124,7 @@ class Level:
             )
     
     
-    def can_sprite_enter(self, cell):
+    def can_object_enter(self, cell):
         return cell in self.map and self.get_cell_type(cell) != 'wall'
     
     

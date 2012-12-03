@@ -4,13 +4,13 @@ import pygame
 
 class Sprite(pygame.sprite.Sprite):
 
-    def __init__(self, map, pos=(0, 0), dir=0):
+    def __init__(self, level, pos=(0, 0), facing=0):
         pygame.sprite.Sprite.__init__(self)
         
         # initial values
-        self.map = map
+        self.level = level
         self.pos = pos
-        self.dir = dir
+        self.facing = facing
         self.to_move = 0
         self.dead = 0
         
@@ -49,7 +49,7 @@ class Sprite(pygame.sprite.Sprite):
 
         if elapsed > 0 and self.to_move:
             distance = self.speed * elapsed
-            dirx, diry = [(0, -1), (1, 0), (0, 1), (-1, 0)][self.dir]
+            dirx, diry = [(0, -1), (1, 0), (0, 1), (-1, 0)][self.facing]
             dx, dy = dirx * distance, diry * distance
             
             if abs(dx) > self.to_move:

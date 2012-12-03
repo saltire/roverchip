@@ -2,8 +2,8 @@ import sprite
 
 class Ball(sprite.Sprite):
     
-    def __init__(self, map, pos):
-        sprite.Sprite.__init__(self, map, pos)
+    def __init__(self, level, pos):
+        sprite.Sprite.__init__(self, level, pos)
         self.colour = (255, 128, 128)
         self.speed = 5
         self.is_movable = 1
@@ -11,11 +11,11 @@ class Ball(sprite.Sprite):
         
     
     def after_move(self):
-        next = self.map.get_neighbour(self.pos, self.dir)
+        next = self.level.get_neighbour(self.pos, self.dir)
 
-        if self.map.is_water(self.pos) and not self.map.get_sprites_in(self.pos, 0, 'SunkenCrate'):
+        if self.level.is_water(self.pos) and not self.level.get_sprites_in(self.pos, 0, 'SunkenCrate'):
             self.kill()
         
-        elif self.map.can_sprite_enter(next) and not self.map.get_solid_sprites_in(next):
+        elif self.level.can_object_enter(next) and not self.level.get_solid_sprites_in(next):
             self.to_move = 1
             

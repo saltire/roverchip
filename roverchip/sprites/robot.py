@@ -2,8 +2,8 @@ import sprite
 
 class Robot(sprite.Sprite):
 
-    def __init__(self, map, pos, dir=0, follow=0):
-        sprite.Sprite.__init__(self, map, pos, dir)
+    def __init__(self, level, pos, facing=0, follow=0):
+        sprite.Sprite.__init__(self, level, pos, facing)
         self.colour = (255, 0, 0)
         self.speed = 1.5
         self.is_enemy = 1
@@ -15,13 +15,13 @@ class Robot(sprite.Sprite):
     def start_turn(self):
         if not self.to_move:
             for t in range(4):
-                dir = (self.dir + ((1 - t) if self.follow else (t - 1))) % 4
-                next = self.map.get_neighbour(self.pos, dir)
-                if (self.map.can_robot_enter(next)
-                    and not self.map.get_solid_sprites_in(next)
-                    and next not in [beam.pos for beam in self.map.beams]
+                movedir = (self.facing + ((1 - t) if self.follow else (t - 1))) % 4
+                nextcell = self.level.get_neighbour(self.pos, movedir)
+                if (self.level.can_robot_enter(nextcell)
+                    and not self.level.get_solid_sprites_in(nextcell)
+                    and nextcell not in [beam.pos for beam in self.level.beams]
                     ):
-                    self.dir = dir
+                    self.facing = movedir
                     self.to_move = 1
                     break
 
