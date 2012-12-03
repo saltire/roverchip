@@ -1,27 +1,17 @@
 import pygame
 
+import cells
 import sprites
 
 
 class Level:
-    cells = [('floor',    (255, 255, 255)),    # 0 - floor
-             ('wall',     (0, 0, 0)),          # 1 - wall
-             ('fire',     (64, 64, 64)),       # 2 - fire
-             ('water',    (0, 128, 255)),      # 3 - water
-             ('water n',  (0, 128, 255)),      # 4 - water n
-             ('water e',  (0, 128, 255)),      # 5 - water e
-             ('water s',  (0, 128, 255)),      # 6 - water s
-             ('water w',  (0, 128, 255)),      # 7 - water w
-             ('grate',    (192, 192, 192)),    # 8 - grate
-             ('exit',     (255, 255, 192)),    # 9 - exit
-             ]
-
-    
     def __init__(self, mapdata, spritedata):
         # init map
-        self.map = mapdata
-        self.width = len(set(x for x, y in self.map))
-        self.height = len(set(y for x, y in self.map))
+        self.cells = {}
+        for pos, celldata in mapdata.items():
+            self.cells[pos] = getattr(cells, celldata[0])(self, *celldata[1:])
+        self.width = len(set(x for x, y in self.cells))
+        self.height = len(set(y for x, y in self.cells))
                 
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()
@@ -45,18 +35,32 @@ class Level:
     # cell data
     
     
-    def get_cell_type(self, (x, y)):
-        return self.cells[self.map[x, y]][0]
+    def get_cell(self, pos):
+        return self.cells.get(pos)
     
     
-    def get_cell_colour(self, (x, y)):
-        return self.cells[self.map[x, y]][1]
-        
-        
+    def player_can_enter(self, pos):
+        return pos in self.cells and (
+            self.cells[pos].player_can_enter 
+            or (self.cells[pos].get_type() == 'Water'
+                and self.get_sprites_in(pos, False, 'SunkenCrate')))
+    
+    
+    def robot_can_enter(self, pos):
+        return pos in self.cells and (
+            self.cells[pos].robot_can_enter 
+            or (self.cells[pos].get_type() == 'Water'
+                and self.get_sprites_in(pos, False, 'SunkenCrate')))
+    
+    
+    def object_can_enter(self, pos):
+        return pos in self.cells and self.cells[pos].object_can_enter
+    
+    
     def get_neighbour(self, (x, y), *ndirs):
         neighbours = [(x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y)]
         ndirs = ndirs or [0, 1, 2, 3]
-        cells = [neighbours[ndir] for ndir in ndirs if neighbours[ndir] in self.map]
+        cells = [neighbours[ndir] for ndir in ndirs if neighbours[ndir] in self.cells]
         return cells if len(cells) > 1 else cells[0] if len(cells) == 1 else None
     
     
@@ -80,62 +84,28 @@ class Level:
         return [sprite for sprite in self.sprites if sprite.get_type() in types or not types]
             
             
-    def get_sprites_in(self, cell, touching=0, *types):
+    def get_sprites_in(self, pos, inside=True, *types):
         return [sprite for sprite in self.sprites if (
-    
-                    # test if object is touching cell, or entirely in it, depending on touching flag
-                    ((cell in sprite.cells_in()) if touching else (cell == sprite.pos))
-                    
-                    # test if sprite is included in types array, if given
-                    and (sprite.get_type() in types or not types)
-                    )]
+                # test if object is entirely in cell, or just touching it, depending on inside flag
+                (pos == sprite.pos if inside else pos in sprite.cells_in())
+                # test if sprite is included in types array, if given
+                and (sprite.get_type() in types or not types)
+                )]
     
     
-    def get_solid_sprites_in(self, cell, touching=0):
-        return [sprite for sprite in self.get_sprites_in(cell, touching) if sprite.is_solid]
+    def get_solid_sprites_in(self, pos, inside=True):
+        return [sprite for sprite in self.get_sprites_in(pos, inside) if sprite.is_solid]
     
     
-    def get_movables_in(self, cell, touching=0):
-        return [sprite for sprite in self.get_sprites_in(cell, touching) if sprite.is_movable]
+    def get_movables_in(self, pos, inside=True):
+        return [sprite for sprite in self.get_sprites_in(pos, inside) if sprite.is_movable]
     
     
-    def get_enemies_in(self, cell, touching=0):
-        return [sprite for sprite in self.get_sprites_in(cell, touching) if sprite.is_enemy]
+    def get_enemies_in(self, pos, inside=True):
+        return [sprite for sprite in self.get_sprites_in(pos, inside) if sprite.is_enemy]
     
     
-    def get_items_in(self, cell, touching=0):
-        return [sprite for sprite in self.get_sprites_in(cell, touching) if sprite.is_item]
+    def get_items_in(self, pos, inside=True):
+        return [sprite for sprite in self.get_sprites_in(pos, inside) if sprite.is_item]
     
     
-    # boolean tests
-    
-    
-    def can_player_enter(self, cell):
-        return cell in self.map and (
-            self.get_cell_type(cell) in ['floor', 'grate', 'exit']
-            or self.is_water(cell) and self.get_sprites_in(cell, 0, 'SunkenCrate')
-            )
-    
-    
-    def can_robot_enter(self, cell):
-        return cell in self.map and (
-            self.map[cell] == 0
-            or self.is_water(cell) and self.get_sprites_in(cell, 0, 'SunkenCrate')
-            )
-    
-    
-    def can_object_enter(self, cell):
-        return cell in self.map and self.get_cell_type(cell) != 'wall'
-    
-    
-    def is_type(self, cell, ctype):
-        return cell in self.map and self.get_cell_type(cell) == ctype
-            
-            
-    def is_water(self, cell):
-        return cell in self.map and self.get_cell_type(cell)[:5] == 'water'
-
-
-    def get_water_dir(self, cell):
-        if cell in self.map and self.get_cell_type(cell)[:6] == 'water ':
-            return self.map[cell] - 4

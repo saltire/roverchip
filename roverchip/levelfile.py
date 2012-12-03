@@ -5,6 +5,19 @@ import level
 
 
 class LevelFile:
+    cells = [('Floor',),
+             ('Wall',),
+             ('Fire',),
+             ('Water',),
+             ('Water', 0), # n
+             ('Water', 1), # e
+             ('Water', 2), # s
+             ('Water', 3), # w
+             ('Grate',),
+             ('Exit',),
+             ]
+    
+    
     def __init__(self, path):
         with open(path) as lfile:
             self.lines = [line.strip() for line in lfile.readlines() if line.strip() and line[0] != '#']
@@ -27,7 +40,8 @@ class LevelFile:
                             width = len(self.lines[i])
                         if not self.lines[i].isdigit() or len(self.lines[i]) != width:
                             break
-                        mapdata.update({(x, i - starti): int(celltype) for x, celltype in enumerate(self.lines[i])})
+                        mapdata.update({(x, i - starti): self.cells[int(celltype)]
+                                        for x, celltype in enumerate(self.lines[i])})
                         i += 1
                             
                     # collect sprite data
@@ -46,7 +60,7 @@ class LevelFile:
                     raise Exception('invalid level format at line {0}:\n{1}'.format(i, self.lines[i]))
                 
                 # check that there is exactly 1 exit
-                if Counter(mapdata.values())[9] != 1:
+                if Counter(mapdata.values())[('Exit',)] != 1:
                     raise Exception('should be exactly 1 exit in level {0}'.format(len(levels) + 1))
                 
                 # check that there is exactly 1 player and 1 rover

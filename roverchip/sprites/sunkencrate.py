@@ -9,7 +9,8 @@ class SunkenCrate(sprite.Sprite):
         
         
     def after_move(self):
-        dir = self.level.get_water_dir(self.pos)
-        if dir is not None and not self.level.get_sprites_in(self.level.get_neighbour(self.pos, dir), 0, 'SunkenCrate'):
-            self.dir = dir
+        flow_dir = self.level.get_cell(self.pos).get_flow_dir()
+        if (flow_dir is not None
+            and not self.level.get_sprites_in(self.level.get_neighbour(self.pos, flow_dir), False, 'SunkenCrate')):
+            self.facing = flow_dir
             self.to_move = 1

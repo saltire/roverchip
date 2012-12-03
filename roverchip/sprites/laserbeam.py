@@ -15,6 +15,6 @@ class Laserbeam(sprite.Sprite):
     def check_collisions(self):
         for sprite in pygame.sprite.spritecollide(self, self.level.destructibles, 1):
             if sprite.get_type() == 'Laser':
-                for beam in object.beams:
+                for beam in sprite.beams:
                     beam.kill()
         

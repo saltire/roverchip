@@ -45,9 +45,9 @@ class Roverchip:
 
         # init background
         self.background = pygame.Surface((self.level.width * self.tilesize, self.level.height * self.tilesize))
-        for x, y in self.level.map:
+        for x, y in self.level.cells:
             rect = x * self.tilesize, y * self.tilesize, self.tilesize, self.tilesize
-            self.background.fill(self.level.get_cell_colour((x, y)), rect)
+            self.background.fill(self.level.get_cell((x, y)).colour, rect)
             
         # draw background
         left, top = self.find_offset()

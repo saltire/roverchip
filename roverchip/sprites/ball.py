@@ -11,11 +11,12 @@ class Ball(sprite.Sprite):
         
     
     def after_move(self):
-        next = self.level.get_neighbour(self.pos, self.dir)
+        nextcell = self.level.get_neighbour(self.pos, self.facing)
 
-        if self.level.is_water(self.pos) and not self.level.get_sprites_in(self.pos, 0, 'SunkenCrate'):
+        if (self.level.get_cell(self.pos).get_type() == 'Water'
+            and not self.level.get_sprites_in(self.pos, False, 'SunkenCrate')):
             self.kill()
         
-        elif self.level.can_object_enter(next) and not self.level.get_solid_sprites_in(next):
+        elif self.level.object_can_enter(nextcell) and not self.level.get_solid_sprites_in(nextcell):
             self.to_move = 1
             

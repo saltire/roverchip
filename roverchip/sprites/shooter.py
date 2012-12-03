@@ -15,7 +15,7 @@ class Shooter(sprite.Sprite):
         cell = self.pos
         while 1:
             cell = self.level.get_neighbour(cell, self.facing)
-            if not cell or not self.level.can_object_enter(cell) or self.level.get_solid_sprites_in(cell):
+            if not cell or not self.level.object_can_enter(cell) or self.level.get_solid_sprites_in(cell):
                 break
             self.path.append(cell)
 

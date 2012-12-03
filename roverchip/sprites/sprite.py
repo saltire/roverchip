@@ -30,10 +30,6 @@ class Sprite(pygame.sprite.Sprite):
         return self.__class__.__name__
     
     
-    def get_pos(self):
-        return self.pos
-        
-        
     def cells_in(self):
         x, y = self.pos
         return set([

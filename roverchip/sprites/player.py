@@ -20,8 +20,8 @@ class Player(sprite.Sprite):
         if not self.to_move:
             self.facing = movedir
             nextcell = self.level.get_neighbour(self.pos, movedir)
-            # check if the sqaure to move to exists and can be moved into
-            if nextcell and self.level.can_player_enter(nextcell):
+            # check if the square to move to exists and can be moved into
+            if nextcell and self.level.player_can_enter(nextcell):
                 door = self.level.get_sprites_in(nextcell, 0, 'Door')
                 key = self.in_inventory('Key')
                 if door and key:
@@ -31,7 +31,7 @@ class Player(sprite.Sprite):
                 # check if the square contains a movable object and if there is room to push it
                 movables = self.level.get_movables_in(nextcell)
                 nextcell2 = self.level.get_neighbour(nextcell, movedir)
-                if movables and self.level.can_object_enter(nextcell2) and not self.level.get_solid_sprites_in(nextcell2, 1) and not self.level.get_enemies_in(nextcell2, 1):
+                if movables and self.level.object_can_enter(nextcell2) and not self.level.get_solid_sprites_in(nextcell2, 1) and not self.level.get_enemies_in(nextcell2, 1):
                     self.pushing.add(movables)
                     self.start_move()
                         
@@ -47,13 +47,13 @@ class Player(sprite.Sprite):
         # also move items in inventory
         for item in set(self.pushing.sprites() + self.inv.sprites()):
             item.speed = max(item.speed, self.speed)
-            item.dir = self.dir
+            item.facing = self.facing
             item.to_move = 1
             
         # move rover
         for follower in self.following.sprites():
             follower.speed = self.speed
-            follower.dir = self.level.get_dir(follower.pos, self.pos)
+            follower.facing = self.level.get_dir(follower.pos, self.pos)
             follower.to_move = 1
     
     
@@ -74,9 +74,9 @@ class Player(sprite.Sprite):
                 
                     
     def done_level(self):
-        return True if (self.level.is_type(self.pos, 'exit') and
-                        any(follower.get_type() == 'Rover' for follower in self.following)
-                        ) else False
+        return (len(self.cells_in()) == 1
+                and self.level.get_cell(self.pos).get_type() == 'Exit'
+                and any(follower.get_type() == 'Rover' for follower in self.following))
         
         
     def in_inventory(self, itype):

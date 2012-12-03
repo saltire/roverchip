@@ -17,7 +17,7 @@ class Robot(sprite.Sprite):
             for t in range(4):
                 movedir = (self.facing + ((1 - t) if self.follow else (t - 1))) % 4
                 nextcell = self.level.get_neighbour(self.pos, movedir)
-                if (self.level.can_robot_enter(nextcell)
+                if (self.level.robot_can_enter(nextcell)
                     and not self.level.get_solid_sprites_in(nextcell)
                     and nextcell not in [beam.pos for beam in self.level.beams]
                     ):

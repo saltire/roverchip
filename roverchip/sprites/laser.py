@@ -36,7 +36,7 @@ class Laser(sprite.Sprite):
         
         
     def find_out_dir(self, cell, in_dir):
-        if not self.level.can_object_enter(cell):
+        if not self.level.object_can_enter(cell):
             return False
         
         mirrors = self.level.get_sprites_in(cell, 0, 'Mirror')
