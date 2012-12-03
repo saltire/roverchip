@@ -1,5 +1,3 @@
-import sys
-
 import pygame
 
 import sprite
@@ -76,11 +74,9 @@ class Player(sprite.Sprite):
                 
                     
     def done_level(self):
-        if self.pos == self.map.exit:
-            for follower in self.following:
-                if follower.get_type() == 'Rover':
-                    return True
-        return False
+        return True if (self.map.is_type(self.pos, 'exit') and
+                        any(follower.get_type() == 'Rover' for follower in self.following)
+                        ) else False
         
         
     def in_inventory(self, type):

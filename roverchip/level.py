@@ -4,30 +4,24 @@ import sprites
 
 
 class Level:
-    colours = [
-               (255, 255, 255),    # 0 - floor
-               (0, 0, 0),          # 1 - wall
-               (64, 64, 64),       # 2 - fire
-               (0, 128, 255),      # 3 - water
-               (0, 128, 255),      # 4 - water n
-               (0, 128, 255),      # 5 - water e
-               (0, 128, 255),      # 6 - water s
-               (0, 128, 255),      # 7 - water w
-               (192, 192, 192)     # 8 - grate
-               ]
+    cells = [('floor',    (255, 255, 255)),    # 0 - floor
+             ('wall',     (0, 0, 0)),          # 1 - wall
+             ('fire',     (64, 64, 64)),       # 2 - fire
+             ('water',    (0, 128, 255)),      # 3 - water
+             ('water n',  (0, 128, 255)),      # 4 - water n
+             ('water e',  (0, 128, 255)),      # 5 - water e
+             ('water s',  (0, 128, 255)),      # 6 - water s
+             ('water w',  (0, 128, 255)),      # 7 - water w
+             ('grate',    (192, 192, 192)),    # 8 - grate
+             ('exit',     (255, 255, 192)),    # 9 - exit
+             ]
 
     
     def __init__(self, mapdata, spritedata):
-        self.height = len(mapdata)
-        self.width = len(mapdata[0])
-        
-        self.exit = spritedata['exit'][0]
-        
         # init map
-        self.map = {}
-        for y in range(self.height):
-            for x in range(self.width):
-                self.map[x, y] = int(mapdata[y][x])
+        self.map = mapdata
+        self.width = len(set(x for x, y in self.map))
+        self.height = len(set(y for x, y in self.map))
                 
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()
@@ -40,7 +34,7 @@ class Level:
         for stype in ('ball', 'crate', 'door', 'key', 'laser', 'robot', 'mirror', 'shooter'):
             for attrs in spritedata.get(stype, []):
                 sprite = getattr(sprites, stype.capitalize())(self, attrs[:2], *attrs[2:])
-                self.sprites.add(sprite, layer=getattr(sprite, 'layer', 0))
+                self.sprites.add(sprite, layer=sprite.layer)
                 
         # groups used for collisions
         self.destructibles = pygame.sprite.Group([sprite for sprite in self.sprites if sprite.is_destructible])
@@ -49,6 +43,14 @@ class Level:
         
         
     # cell data
+    
+    
+    def get_cell_type(self, (x, y)):
+        return self.cells[self.map[x, y]][0]
+    
+    
+    def get_cell_colour(self, (x, y)):
+        return self.cells[self.map[x, y]][1]
         
         
     def get_neighbour(self, (x, y), *dirs):
@@ -110,7 +112,7 @@ class Level:
     
     def can_player_enter(self, cell):
         return cell in self.map and (
-            self.map[cell] in [0, 8]
+            self.get_cell_type(cell) in ['floor', 'grate', 'exit']
             or self.is_water(cell) and self.get_sprites_in(cell, 0, 'SunkenCrate')
             )
     
@@ -123,17 +125,17 @@ class Level:
     
     
     def can_sprite_enter(self, cell):
-        return cell in self.map and self.map[cell] in [0, 2, 3, 4, 5, 6, 7, 8]
+        return cell in self.map and self.get_cell_type(cell) != 'wall'
+    
+    
+    def is_type(self, cell, ctype):
+        return cell in self.map and self.get_cell_type(cell) == ctype
             
             
-    def is_fire(self, cell):
-        return cell in self.map and self.map[cell] == 2
-
-
     def is_water(self, cell):
-        return cell in self.map and self.map[cell] in [3, 4, 5, 6, 7]
+        return cell in self.map and self.get_cell_type(cell)[:5] == 'water'
 
 
     def get_water_dir(self, cell):
-        if cell in self.map and self.map[cell] in [4, 5, 6, 7]:
+        if cell in self.map and self.get_cell_type(cell)[:6] == 'water ':
             return self.map[cell] - 4

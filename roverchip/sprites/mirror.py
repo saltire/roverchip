@@ -21,7 +21,7 @@ class Mirror(sprite.Sprite):
     
     
     def after_move(self):
-        if self.map.is_fire(self.pos):
+        if self.map.is_type(self.pos, 'fire'):
             self.to_move = 1
 
         elif self.map.is_water(self.pos) and not self.map.get_sprites_in(self.pos, 0, 'SunkenCrate'):

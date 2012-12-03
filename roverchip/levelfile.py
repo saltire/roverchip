@@ -1,3 +1,4 @@
+from collections import Counter
 import re
 
 import level
@@ -15,17 +16,18 @@ class LevelFile:
         for i, startline in enumerate(self.lines):
             if startline[0] == '!':
                 i += 1
+                starti = i
                 
                 try:
                     # collect map data
-                    mapdata = []
+                    mapdata = {}
                     width = None
                     while True:
                         if width is None:
                             width = len(self.lines[i])
                         if not self.lines[i].isdigit() or len(self.lines[i]) != width:
                             break
-                        mapdata.append(self.lines[i])
+                        mapdata.update({(x, i - starti): int(celltype) for x, celltype in enumerate(self.lines[i])})
                         i += 1
                             
                     # collect sprite data
@@ -43,9 +45,18 @@ class LevelFile:
                 if not mapdata or not sprites:
                     raise Exception('invalid level format at line {0}:\n{1}'.format(i, self.lines[i]))
                 
-                for item in ('player', 'rover', 'exit'):
-                    if item not in sprites:
-                        raise Exception('missing level data: {0}'.format(item))
+                # check that there is exactly 1 exit
+                if Counter(mapdata.values())[9] != 1:
+                    raise Exception('should be exactly 1 exit in level {0}'.format(len(levels) + 1))
+                
+                # check that there is exactly 1 player and 1 rover
+                for stype in ('player', 'rover'):
+                    if stype not in sprites:
+                        raise Exception('missing {0} data in level {1}'.format(stype, len(levels) + 1))
+                    elif len(sprites[stype]) > 1:
+                        raise Exception('multiple {0} data in level {1}'.format(stype, len(levels) + 1))
+                    
+                
                 
                 levels.append(level.Level(mapdata, sprites))
 

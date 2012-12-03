@@ -16,6 +16,7 @@ class Sprite(pygame.sprite.Sprite):
         
         # defaults to override
         self.colour = (0, 0, 0)
+        self.layer = 0
         self.size = 1
         self.speed = 1
         self.is_movable = 0         # can be pushed by player
@@ -27,6 +28,10 @@ class Sprite(pygame.sprite.Sprite):
         
     def get_type(self):
         return self.__class__.__name__
+    
+    
+    def get_pos(self):
+        return self.pos
         
         
     def cells_in(self):
