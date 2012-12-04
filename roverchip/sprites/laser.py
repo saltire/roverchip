@@ -15,6 +15,7 @@ class Laser(sprite.Sprite):
 
         
     def start_turn(self):
+        """Render the laser beams every turn."""
         for beam in self.beams:
             beam.kill()
         cell = self.pos
@@ -24,7 +25,7 @@ class Laser(sprite.Sprite):
             cell = self.level.get_neighbour(cell, out_dir)
             in_dir = out_dir
             out_dir = self.find_out_dir(cell, in_dir)
-            if out_dir is False:
+            if out_dir is None:
                 break
                 
             beam = Laserbeam(self.level, cell, (in_dir, out_dir))
@@ -35,8 +36,9 @@ class Laser(sprite.Sprite):
         
         
     def find_out_dir(self, cell, in_dir):
+        """When a laser beam enters a cell, find out which in direction it exits."""
         if not self.level.object_can_enter(cell):
-            return False
+            return None
         
         try:
             mirror = next(self.level.get_sprites_in(cell, False, 'Mirror'))
@@ -46,7 +48,7 @@ class Laser(sprite.Sprite):
         
         for sprite in self.level.get_solid_sprites_in(cell, True):
             if not sprite.is_destructible and sprite not in self.level.get_solid_sprites_in(self.level.get_neighbour(cell, in_dir), 1):
-                return False
+                return None
         
         return in_dir
     
@@ -62,7 +64,10 @@ class Laserbeam(sprite.Sprite):
 
 
     def check_collisions(self):
-        for sprite in pygame.sprite.spritecollide(self, self.level.destructibles, 1):
+        """Kill all destructible items touching the laserbeam (this is done
+        automatically by the spritecollide method). Also remove laserbeams
+        emitting from any lasers that are destroyed."""
+        for sprite in pygame.sprite.spritecollide(self, self.level.destructibles, True):
             if sprite.get_type() == 'Laser':
                 for beam in sprite.beams:
                     beam.kill()

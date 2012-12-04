@@ -12,8 +12,6 @@ class Rover(sprite.Sprite):
 
 
     def check_collisions(self):
-        if self.pos in (pos for shooter in self.level.get_sprites('Shooter') for pos in shooter.path):
-            self.kill()
-
+        """Kill Rover if he is touching any enemies."""
         if pygame.sprite.spritecollideany(self, self.level.enemies):
             self.kill()

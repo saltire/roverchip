@@ -96,11 +96,7 @@ class Player(sprite.Sprite):
             
             
     def check_collisions(self):
-        """Kill the player if he is touching any enemies or is in the path
-        of any shooters."""
-        if self.pos in (pos for shooter in self.level.get_sprites('Shooter') for pos in shooter.path):
-            self.kill()
-
+        """Kill the player if he is touching any enemies."""
         if pygame.sprite.spritecollideany(self, self.level.enemies):
             self.kill()
             
