@@ -2,8 +2,8 @@ import math
 
 import pygame
 
-class Sprite(pygame.sprite.Sprite):
 
+class Sprite(pygame.sprite.Sprite):
     def __init__(self, level, pos=(0, 0), facing=0):
         pygame.sprite.Sprite.__init__(self)
         

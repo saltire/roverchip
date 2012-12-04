@@ -1,7 +1,7 @@
 import sprite
 
-class Robot(sprite.Sprite):
 
+class Robot(sprite.Sprite):
     def __init__(self, level, pos, facing=0, follow=0):
         sprite.Sprite.__init__(self, level, pos, facing)
         self.colour = (255, 0, 0)
@@ -19,7 +19,7 @@ class Robot(sprite.Sprite):
                 nextcell = self.level.get_neighbour(self.pos, movedir)
                 if (self.level.robot_can_enter(nextcell)
                     and not self.level.get_solid_sprites_in(nextcell)
-                    and nextcell not in [beam.pos for beam in self.level.beams]
+                    and nextcell not in (beam.pos for beam in self.level.beams)
                     ):
                     self.facing = movedir
                     self.to_move = 1

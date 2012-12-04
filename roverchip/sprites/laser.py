@@ -1,10 +1,9 @@
 import pygame
 
-import laserbeam
 import sprite
 
-class Laser(sprite.Sprite):
 
+class Laser(sprite.Sprite):
     def __init__(self, level, pos, facing):
         sprite.Sprite.__init__(self, level, pos, facing)
         self.colour = (192, 64, 0)
@@ -28,7 +27,7 @@ class Laser(sprite.Sprite):
             if out_dir is False:
                 break
                 
-            beam = laserbeam.Laserbeam(self.level, cell, (in_dir, out_dir))
+            beam = Laserbeam(self.level, cell, (in_dir, out_dir))
             self.beams.add(beam)
             
         self.level.sprites.add(self.beams, layer=3)
@@ -50,4 +49,19 @@ class Laser(sprite.Sprite):
         return in_dir
     
         
+        
+class Laserbeam(sprite.Sprite):    
+    def __init__(self, level, pos, dirs):
+        sprite.Sprite.__init__(self, level, pos)
+        self.colour = (192, 64, 0, 128)
+        self.layer = 2
+
+        self.dirs = dirs
+
+
+    def check_collisions(self):
+        for sprite in pygame.sprite.spritecollide(self, self.level.destructibles, 1):
+            if sprite.get_type() == 'Laser':
+                for beam in sprite.beams:
+                    beam.kill()
         

@@ -1,7 +1,7 @@
 import sprite
 
-class Ball(sprite.Sprite):
-    
+
+class Ball(sprite.Sprite):   
     def __init__(self, level, pos):
         sprite.Sprite.__init__(self, level, pos)
         self.colour = (255, 128, 128)

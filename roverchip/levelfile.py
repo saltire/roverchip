@@ -71,7 +71,6 @@ class LevelFile:
                         raise Exception('multiple {0} data in level {1}'.format(stype, len(levels) + 1))
                     
                 
-                
                 levels.append(level.Level(mapdata, sprites))
 
         return levels

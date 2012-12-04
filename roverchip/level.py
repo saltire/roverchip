@@ -57,11 +57,9 @@ class Level:
         return pos in self.cells and self.cells[pos].object_can_enter
     
     
-    def get_neighbour(self, (x, y), *ndirs):
-        neighbours = [(x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y)]
-        ndirs = ndirs or [0, 1, 2, 3]
-        cells = [neighbours[ndir] for ndir in ndirs if neighbours[ndir] in self.cells]
-        return cells if len(cells) > 1 else cells[0] if len(cells) == 1 else None
+    def get_neighbour(self, (x, y), ndir):
+        neighbours = (x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y)
+        return neighbours[ndir] if neighbours[ndir] in self.cells else None
     
     
     def get_dir(self, (x1, y1), (x2, y2)):

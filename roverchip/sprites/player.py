@@ -2,8 +2,8 @@ import pygame
 
 import sprite
 
-class Player(sprite.Sprite):
-    
+
+class Player(sprite.Sprite):   
     def __init__(self, level, pos, facing=0):
         sprite.Sprite.__init__(self, level, pos, facing)
         self.colour = (0, 0, 255)
@@ -23,17 +23,21 @@ class Player(sprite.Sprite):
             # check if the square to move to exists and can be moved into
             if nextcell and self.level.player_can_enter(nextcell):
                 door = self.level.get_sprites_in(nextcell, 0, 'Door')
-                key = self.in_inventory('Key')
+                key = self.get_carried_items('Key')
                 if door and key:
                     door[0].kill()
                     key[0].kill()
                 
                 # check if the square contains a movable object and if there is room to push it
                 movables = self.level.get_movables_in(nextcell)
-                nextcell2 = self.level.get_neighbour(nextcell, movedir)
-                if movables and self.level.object_can_enter(nextcell2) and not self.level.get_solid_sprites_in(nextcell2, 1) and not self.level.get_enemies_in(nextcell2, 1):
-                    self.pushing.add(movables)
-                    self.start_move()
+                if movables:
+                    nextcell2 = self.level.get_neighbour(nextcell, movedir)
+                    if (nextcell2 and self.level.object_can_enter(nextcell2)
+                        and not self.level.get_solid_sprites_in(nextcell2, 1)
+                        and not self.level.get_enemies_in(nextcell2, 1)
+                        ):
+                        self.pushing.add(movables)
+                        self.start_move()
                         
                 # check that the square does not contain any immovable objects
                 elif not self.level.get_solid_sprites_in(nextcell):
@@ -79,12 +83,12 @@ class Player(sprite.Sprite):
                 and any(follower.get_type() == 'Rover' for follower in self.following))
         
         
-    def in_inventory(self, itype):
+    def get_carried_items(self, itype):
         return [item for item in self.inv if item.get_type() == itype]
             
             
     def check_collisions(self):
-        if self.pos in [pos for shooter in self.level.get_sprites('Shooter') for pos in shooter.path]:
+        if self.pos in (pos for shooter in self.level.get_sprites('Shooter') for pos in shooter.path):
             self.kill()
 
         if pygame.sprite.spritecollideany(self, self.level.enemies):

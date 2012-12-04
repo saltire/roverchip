@@ -1,7 +1,7 @@
 import sprite
 
-class Mirror(sprite.Sprite):
 
+class Mirror(sprite.Sprite):
     def __init__(self, level, pos, facing):
         sprite.Sprite.__init__(self, level, pos)
         self.colour = (128, 128, 255)
