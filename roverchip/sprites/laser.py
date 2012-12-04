@@ -6,10 +6,10 @@ import sprite
 class Laser(sprite.Sprite):
     def __init__(self, level, pos, facing):
         sprite.Sprite.__init__(self, level, pos, facing)
-        self.colour = (192, 64, 0)
+        self.colour = 192, 64, 0
         self.layer = 3
-        self.is_solid = 1
-        self.is_destructible = 1
+        self.is_solid = True
+        self.is_destructible = True
         
         self.beams = pygame.sprite.Group()
 
@@ -20,7 +20,7 @@ class Laser(sprite.Sprite):
         cell = self.pos
         out_dir = self.facing
         
-        while 1:
+        while True:
             cell = self.level.get_neighbour(cell, out_dir)
             in_dir = out_dir
             out_dir = self.find_out_dir(cell, in_dir)
@@ -38,11 +38,13 @@ class Laser(sprite.Sprite):
         if not self.level.object_can_enter(cell):
             return False
         
-        mirrors = self.level.get_sprites_in(cell, 0, 'Mirror')
-        if mirrors:
-            return mirrors[0].get_out_dir(in_dir)
+        try:
+            mirror = next(self.level.get_sprites_in(cell, False, 'Mirror'))
+            return mirror.get_out_dir(in_dir)
+        except StopIteration:
+            pass
         
-        for sprite in self.level.get_solid_sprites_in(cell, 1):
+        for sprite in self.level.get_solid_sprites_in(cell, True):
             if not sprite.is_destructible and sprite not in self.level.get_solid_sprites_in(self.level.get_neighbour(cell, in_dir), 1):
                 return False
         
@@ -53,7 +55,7 @@ class Laser(sprite.Sprite):
 class Laserbeam(sprite.Sprite):    
     def __init__(self, level, pos, dirs):
         sprite.Sprite.__init__(self, level, pos)
-        self.colour = (192, 64, 0, 128)
+        self.colour = 192, 64, 0, 128
         self.layer = 2
 
         self.dirs = dirs

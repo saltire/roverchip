@@ -6,10 +6,10 @@ import sprite
 class Player(sprite.Sprite):   
     def __init__(self, level, pos, facing=0):
         sprite.Sprite.__init__(self, level, pos, facing)
-        self.colour = (0, 0, 255)
+        self.colour = 0, 0, 255
         self.layer = 1
         self.speed = 4
-        self.is_destructible = 1
+        self.is_destructible = True
         
         self.following = pygame.sprite.Group()
         self.pushing = pygame.sprite.Group()
@@ -24,19 +24,21 @@ class Player(sprite.Sprite):
             nextcell = self.level.get_neighbour(self.pos, movedir)
             # check if the square to move to exists and can be moved into
             if nextcell and self.level.player_can_enter(nextcell):
-                door = self.level.get_sprites_in(nextcell, 0, 'Door')
-                key = self.get_carried_items('Key')
-                if door and key:
-                    door[0].kill()
-                    key[0].kill()
+                try:
+                    door = next(self.level.get_sprites_in(nextcell, False, 'Door'))
+                    key = next(self.get_carried_items('Key'))
+                    door.kill()
+                    key.kill()
+                except StopIteration:
+                    pass
                 
                 # check if the square contains a movable object and if there is room to push it
                 movables = self.level.get_movables_in(nextcell)
                 if movables:
                     nextcell2 = self.level.get_neighbour(nextcell, movedir)
                     if (nextcell2 and self.level.object_can_enter(nextcell2)
-                        and not self.level.get_solid_sprites_in(nextcell2, 1)
-                        and not self.level.get_enemies_in(nextcell2, 1)
+                        and not self.level.get_solid_sprites_in(nextcell2, False)
+                        and not self.level.get_enemies_in(nextcell2, False)
                         ):
                         self.pushing.add(movables)
                         self.start_move()
@@ -76,7 +78,7 @@ class Player(sprite.Sprite):
         
         # check for rover
         for direction in range(4):
-            rover = self.level.get_sprites_in(self.level.get_neighbour(self.pos, direction), 0, 'Rover')
+            rover = self.level.get_sprites_in(self.level.get_neighbour(self.pos, direction), False, 'Rover')
             if rover:
                 self.following.add(rover)
                 
@@ -90,7 +92,7 @@ class Player(sprite.Sprite):
         
     def get_carried_items(self, itype):
         """Return all items that the player is carrying."""
-        return [item for item in self.inv if item.get_type() == itype]
+        return (item for item in self.inv if item.get_type() == itype)
             
             
     def check_collisions(self):

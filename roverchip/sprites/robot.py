@@ -4,10 +4,10 @@ import sprite
 class Robot(sprite.Sprite):
     def __init__(self, level, pos, facing=0, follow=0):
         sprite.Sprite.__init__(self, level, pos, facing)
-        self.colour = (255, 0, 0)
+        self.colour = 255, 0, 0
         self.speed = 1.5
-        self.is_enemy = 1
-        self.is_destructible = 1
+        self.is_enemy = True
+        self.is_destructible = True
         
         self.follow = follow # 0 = left wall, 1 = right wall
         

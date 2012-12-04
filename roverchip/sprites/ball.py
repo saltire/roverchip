@@ -4,10 +4,10 @@ import sprite
 class Ball(sprite.Sprite):   
     def __init__(self, level, pos):
         sprite.Sprite.__init__(self, level, pos)
-        self.colour = (255, 128, 128)
+        self.colour = 255, 128, 128
         self.speed = 5
-        self.is_movable = 1
-        self.is_solid = 1
+        self.is_movable = True
+        self.is_solid = True
         
     
     def after_move(self):

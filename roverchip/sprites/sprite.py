@@ -12,18 +12,17 @@ class Sprite(pygame.sprite.Sprite):
         self.pos = pos
         self.facing = facing
         self.to_move = 0
-        self.dead = 0
         
         # defaults to override
-        self.colour = (0, 0, 0)
+        self.colour = 0, 0, 0
         self.layer = 0
         self.size = 1
         self.speed = 1
-        self.is_movable = 0         # can be pushed by player
-        self.is_solid = 0           # will stop things from entering its square
-        self.is_enemy = 0           # will kill player on touch
-        self.is_item = 0            # can be picked up by player
-        self.is_destructible = 0    # will be destroyed by laserbeams
+        self.is_movable = False         # can be pushed by player
+        self.is_solid = False           # will stop things from entering its square
+        self.is_enemy = False           # will kill player on touch
+        self.is_item = False            # can be picked up by player
+        self.is_destructible = False    # will be destroyed by laserbeams
         
         
     def get_type(self):

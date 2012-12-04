@@ -4,9 +4,9 @@ import sprite
 class Mirror(sprite.Sprite):
     def __init__(self, level, pos, facing):
         sprite.Sprite.__init__(self, level, pos)
-        self.colour = (128, 128, 255)
-        self.is_movable = 1
-        self.is_solid = 1
+        self.colour = 128, 128, 255
+        self.is_movable = True
+        self.is_solid = True
         
         # facing = diagonal dir the mirror is facing: 0-3, clockwise from northwest
         # self.dirs = the two cardinal dirs the mirror is facing
@@ -25,6 +25,6 @@ class Mirror(sprite.Sprite):
             self.to_move = 1
 
         elif (self.level.get_cell(self.pos).get_type() == 'Water'
-              and not self.level.get_sprites_in(self.pos, 0, 'SunkenCrate')):
+              and not self.level.get_sprites_in(self.pos, False, 'SunkenCrate')):
             self.kill()
         
