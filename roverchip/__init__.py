@@ -17,10 +17,6 @@ class Roverchip:
         # init keyboard settings
         pygame.key.set_repeat(1, 50)
 
-        # init map
-        self.levels = levelfile.LevelFile(levelpath).get_levels()
-        self.level = self.levels[0]
-
         # init window
         tilesize = 75
         self.viewsize = (10, 6)
@@ -28,7 +24,10 @@ class Roverchip:
         self.init_window((vw * tilesize, vh * tilesize))
         
         # start loop
-        self.loop()
+        # init map
+        for self.level in levelfile.LevelFile(levelpath).get_levels():
+            self.draw_level()
+            self.loop()
         
         
     def init_window(self, (width, height)):
@@ -43,6 +42,8 @@ class Roverchip:
         self.left, self.top = int((width - self.width) / 2), int((height - self.height) / 2)
         self.view = self.window.subsurface((self.left, self.top, self.width, self.height))
 
+
+    def draw_level(self):
         # init background
         self.background = pygame.Surface((self.level.width * self.tilesize, self.level.height * self.tilesize))
         for x, y in self.level.cells:
@@ -95,11 +96,15 @@ class Roverchip:
                 # resize window
                 elif event.type == VIDEORESIZE:
                     self.init_window(event.size)
+                    self.draw_level()
                     
                 # move controls
                 elif event.type == KEYDOWN:
                     if event.key in dirkeys:
                         self.level.player.try_move(dirkeys.index(event.key))
+                        
+                    if event.key == K_RETURN:
+                        return
                             
                             
             # execute frame for all sprites in layer order
@@ -123,7 +128,7 @@ class Roverchip:
             
             # check for win condition
             if self.level.player.done_level():
-                sys.exit('Yay!')
+                return
                 
             self.level.sprites.draw(self.view)
 
