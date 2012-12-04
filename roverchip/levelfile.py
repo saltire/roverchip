@@ -17,6 +17,9 @@ class LevelFile:
              ('Exit',),
              ]
     
+    sprites = ['ball', 'crate', 'door', 'key', 'laser', 'mirror', 'player',
+               'robot', 'rover', 'shooter']
+    
     
     def __init__(self, path):
         with open(path) as lfile:
@@ -33,9 +36,11 @@ class LevelFile:
                 i += 1
                 starti = i
                 
+                mapdata = {}
+                sprites = []
+                
                 try:
                     # collect map data
-                    mapdata = {}
                     width = None
                     while True:
                         if width is None:
@@ -45,21 +50,25 @@ class LevelFile:
                         mapdata.update({(x, i - starti): self.cells[int(celltype)]
                                         for x, celltype in enumerate(self.lines[i])})
                         i += 1
+                        
+                    if not mapdata:
+                        raise Exception('invalid level format at line {0}:\n{1}'.format(i, self.lines[i]))
                             
                     # collect sprite data
-                    sprites = {}
                     while True:
                         match = re.match('(\w+):\s*((\d+,\s*)*\d+)', self.lines[i])
                         if not match:
                             break
-                        sprites.setdefault(match.group(1), []).append(tuple(int(x) for x in match.group(2).split(',')))
+                        
+                        if match.group(1) not in self.sprites:
+                            raise Exception('invalid sprite data at line {0}'.format(i))
+                        
+                        sprites.append((match.group(1),)
+                                       + tuple(int(x) for x in match.group(2).split(',')))
                         i += 1
                 
                 except IndexError:
                     pass # eof
-                
-                if not mapdata or not sprites:
-                    raise Exception('invalid level format at line {0}:\n{1}'.format(i, self.lines[i]))
                 
                 # check that there is exactly 1 exit
                 if Counter(mapdata.values())[('Exit',)] != 1:
@@ -67,9 +76,10 @@ class LevelFile:
                 
                 # check that there is exactly 1 player and 1 rover
                 for stype in ('player', 'rover'):
-                    if stype not in sprites:
+                    scount = len([True for sprite in sprites if sprite[0] == stype])
+                    if scount == 0:
                         raise Exception('missing {0} data in level {1}'.format(stype, len(levels) + 1))
-                    elif len(sprites[stype]) > 1:
+                    elif scount > 1:
                         raise Exception('multiple {0} data in level {1}'.format(stype, len(levels) + 1))
                     
                 

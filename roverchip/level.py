@@ -17,15 +17,14 @@ class Level:
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()
         
-        self.player = sprites.Player(self, spritedata['player'][0])
-        self.rover = sprites.Rover(self, spritedata['rover'][0])
-        self.sprites.add(self.player, layer=1)
-        self.sprites.add(self.rover, layer=1)
-        
-        for stype in ('ball', 'crate', 'door', 'key', 'laser', 'robot', 'mirror', 'shooter'):
-            for attrs in spritedata.get(stype, []):
-                sprite = getattr(sprites, stype.capitalize())(self, attrs[:2], *attrs[2:])
-                self.sprites.add(sprite, layer=sprite.layer)
+        for sdata in spritedata:
+            sprite = getattr(sprites, sdata[0].capitalize())(self, sdata[1:3], *sdata[3:])
+            self.sprites.add(sprite, layer=sprite.layer)
+            
+            if sdata[0] == 'player':
+                self.player = sprite
+            if sdata[0] == 'rover':
+                self.rover = sprite
                 
         # groups used for collisions
         self.destructibles = pygame.sprite.Group([sprite for sprite in self.sprites if sprite.is_destructible])
