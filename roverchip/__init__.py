@@ -19,15 +19,14 @@ class Roverchip:
 
         # init window
         tilesize = 75
-        self.viewsize = (10, 6)
+        self.viewsize = 10, 6
         vw, vh = self.viewsize
         self.init_window((vw * tilesize, vh * tilesize))
         
         # start loop
         # init map
-        for self.level in levelfile.LevelFile(levelpath).get_levels():
-            self.draw_level()
-            self.loop()
+        for level in levelfile.LevelFile(levelpath).get_levels():
+            self.loop(level)
         
         
     def init_window(self, (width, height)):
@@ -43,27 +42,27 @@ class Roverchip:
         self.view = self.window.subsurface((self.left, self.top, self.width, self.height))
 
 
-    def draw_level(self):
+    def draw_level(self, level):
         # init background
-        self.background = pygame.Surface((self.level.width * self.tilesize, self.level.height * self.tilesize))
-        for x, y in self.level.cells:
+        self.background = pygame.Surface((level.width * self.tilesize, level.height * self.tilesize))
+        for x, y in level.cells:
             rect = x * self.tilesize, y * self.tilesize, self.tilesize, self.tilesize
-            self.background.fill(self.level.get_cell((x, y)).colour, rect)
+            self.background.fill(level.get_cell((x, y)).colour, rect)
             
         # draw background
-        left, top = self.find_offset()
+        left, top = self.find_offset(level)
         self.view.blit(self.background, (0, 0), (left, top, self.width, self.height))
 
         # draw sprites
-        self.level.sprites.update(self.tilesize, (left, top))
-        self.level.sprites.draw(self.view)
+        level.sprites.update(self.tilesize, (left, top))
+        level.sprites.draw(self.view)
 
         # update display
         pygame.display.update()
         
         
-    def find_offset(self):
-        px, py = self.level.player.pos
+    def find_offset(self, level):
+        px, py = level.player.pos
         vw, vh = self.viewsize
         
         # find offset that places the player in the centre
@@ -71,16 +70,18 @@ class Roverchip:
         oy = py - (vh - 1) / 2.0
         
         # clamp values so as not to go off the edge
-        left = max(0, min(ox, self.level.width - vw))
-        top = max(0, min(oy, self.level.height - vh))
+        left = max(0, min(ox, level.width - vw))
+        top = max(0, min(oy, level.height - vh))
         
         return int(left * self.tilesize), int(top * self.tilesize)
 
         
-    def loop(self):
-        dirkeys = [K_UP, K_RIGHT, K_DOWN, K_LEFT]
+    def loop(self, level):
+        dirkeys = K_UP, K_RIGHT, K_DOWN, K_LEFT
         
-        while 1:
+        self.draw_level(level)
+        
+        while True:
             # update clock
             old_time = self.time
             self.time += self.clock.tick()
@@ -96,41 +97,41 @@ class Roverchip:
                 # resize window
                 elif event.type == VIDEORESIZE:
                     self.init_window(event.size)
-                    self.draw_level()
+                    self.draw_level(level)
                     
                 # move controls
                 elif event.type == KEYDOWN:
                     if event.key in dirkeys:
-                        self.level.player.try_move(dirkeys.index(event.key))
+                        level.player.try_move(dirkeys.index(event.key))
                         
                     if event.key == K_RETURN:
                         return
                             
                             
             # execute frame for all sprites in layer order
-            for sprite in self.level.sprites.sprites():
+            for sprite in level.sprites.sprites():
                 sprite.do_turn(elapsed)
             
             # get offset and draw background
-            left, top = self.find_offset()
+            left, top = self.find_offset(level)
             self.view.blit(self.background, (0, 0), (left, top, self.width, self.height))
 
             # update sprite positions, check for collisions, draw sprites
-            self.level.sprites.update(self.tilesize, (left, top))
-            for sprite in self.level.sprites.sprites():
+            level.sprites.update(self.tilesize, (left, top))
+            for sprite in level.sprites.sprites():
                 sprite.check_collisions()
                 
             # check for death
-            if not self.level.player.alive():
+            if not level.player.alive():
                 sys.exit('Ouch!')
-            if not self.level.rover.alive():
+            if not level.rover.alive():
                 sys.exit('Arf!')
             
             # check for win condition
-            if self.level.player.done_level():
+            if level.player.done_level():
                 return
                 
-            self.level.sprites.draw(self.view)
+            level.sprites.draw(self.view)
 
             # update display
             pygame.display.update()
