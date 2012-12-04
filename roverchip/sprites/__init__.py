@@ -1,4 +1,5 @@
 from ball import Ball
+from cart import Cart
 from crate import Crate
 from door import Door
 from key import Key

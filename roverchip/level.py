@@ -85,16 +85,16 @@ class Level:
     
     def get_sprites(self, *types):
         """Return all sprites, optionally filtering by a sprite type."""
-        return (sprite for sprite in self.sprites if sprite.get_type() in types or not types)
+        return [sprite for sprite in self.sprites if sprite.get_type() in types or not types]
             
             
     def get_sprites_in(self, pos, inside=True, *types):
         """Return all sprites at a given coordinate, optionally filtering by
         a type. If inside is true, return only the sprites that are entirely
         in that cell, rather than just touching it."""
-        return (sprite for sprite in self.sprites
+        return [sprite for sprite in self.sprites
                 if (pos == sprite.pos if inside else pos in sprite.cells_in())
-                and (sprite.get_type() in types or not types))
+                and (sprite.get_type() in types or not types)]
     
     
     def get_solid_sprites_in(self, pos, inside=True):

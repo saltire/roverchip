@@ -27,6 +27,8 @@ class Roverchip:
         # init map
         for level in levelfile.LevelFile(levelpath).get_levels():
             self.loop(level)
+            
+        sys.exit('Yay!')
         
         
     def init_window(self, (width, height)):

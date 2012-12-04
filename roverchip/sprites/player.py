@@ -24,13 +24,11 @@ class Player(sprite.Sprite):
             nextcell = self.level.get_neighbour(self.pos, movedir)
             # check if the square to move to exists and can be moved into
             if nextcell and self.level.player_can_enter(nextcell):
-                try:
-                    door = next(self.level.get_sprites_in(nextcell, False, 'Door'))
-                    key = next(self.get_carried_items('Key'))
-                    door.kill()
-                    key.kill()
-                except StopIteration:
-                    pass
+                door = self.level.get_sprites_in(nextcell, False, 'Door')
+                key = self.get_carried_items('Key')
+                if door and key:
+                    door[0].kill()
+                    key[0].kill()
                 
                 # check if the square contains a movable object and if there is room to push it
                 movables = self.level.get_movables_in(nextcell)
@@ -92,7 +90,7 @@ class Player(sprite.Sprite):
         
     def get_carried_items(self, itype):
         """Return all items that the player is carrying."""
-        return (item for item in self.inv if item.get_type() == itype)
+        return [item for item in self.inv if item.get_type() == itype]
             
             
     def check_collisions(self):
