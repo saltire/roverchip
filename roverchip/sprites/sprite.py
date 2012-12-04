@@ -27,10 +27,12 @@ class Sprite(pygame.sprite.Sprite):
         
         
     def get_type(self):
+        """Return the type of the sprite, i.e. its class name."""
         return self.__class__.__name__
     
     
     def cells_in(self):
+        """Return all cells that the sprite is touching."""
         x, y = self.pos
         return set([
             (math.floor(x), math.floor(y)),
@@ -41,6 +43,8 @@ class Sprite(pygame.sprite.Sprite):
             
             
     def do_turn(self, elapsed=0):
+        """Run any hooks at the start of an object's turn, do any movement,
+        and run any hooks if it is finished moving."""
         self.start_turn()
 
         if elapsed > 0 and self.to_move:
@@ -62,6 +66,7 @@ class Sprite(pygame.sprite.Sprite):
         
         
     def update(self, tilesize, offset):
+        """Draw the actual sprite."""
         # either initialize image and rect, or just update rect
         x, y = self.pos
         ox, oy = offset
@@ -80,12 +85,16 @@ class Sprite(pygame.sprite.Sprite):
             
             
     def start_turn(self):
+        """A hook that is run at the start of every turn."""
         pass
         
 
     def after_move(self):
+        """A hook that is run as soon as the sprite arrives in a new cell."""
         pass
     
     
     def check_collisions(self):
+        """A hook run at the end of every turn, for collision-related actions."""
         pass
+    

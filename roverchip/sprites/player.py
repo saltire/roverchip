@@ -17,6 +17,8 @@ class Player(sprite.Sprite):
         
 
     def try_move(self, movedir):
+        """Check if movement is possible in the given direction, and if so,
+        initiate movement."""
         if not self.to_move:
             self.facing = movedir
             nextcell = self.level.get_neighbour(self.pos, movedir)
@@ -45,6 +47,7 @@ class Player(sprite.Sprite):
                     
                     
     def start_move(self):
+        """Start the player moving one square in the facing direction."""
         self.last_pos = self.pos
         self.to_move = 1
         
@@ -62,6 +65,7 @@ class Player(sprite.Sprite):
     
     
     def after_move(self):
+        """Run checks for items in the new square, and clean up movement actions."""
         # pick up items
         for item in self.level.get_items_in(self.pos):
             if not self.inv.has(item):
@@ -78,16 +82,20 @@ class Player(sprite.Sprite):
                 
                     
     def done_level(self):
+        """Check to see if the level has been completed."""
         return (len(self.cells_in()) == 1
                 and self.level.get_cell(self.pos).get_type() == 'Exit'
                 and any(follower.get_type() == 'Rover' for follower in self.following))
         
         
     def get_carried_items(self, itype):
+        """Return all items that the player is carrying."""
         return [item for item in self.inv if item.get_type() == itype]
             
             
     def check_collisions(self):
+        """Kill the player if he is touching any enemies or is in the path
+        of any shooters."""
         if self.pos in (pos for shooter in self.level.get_sprites('Shooter') for pos in shooter.path):
             self.kill()
 

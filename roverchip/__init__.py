@@ -30,6 +30,8 @@ class Roverchip:
         
         
     def init_window(self, (width, height)):
+        """Initialize the game window. Called at beginning, and every time
+        the window is resized."""
         # init window and background
         self.window = pygame.display.set_mode((width, height), RESIZABLE)
         self.window.fill((0, 0, 0))
@@ -43,6 +45,8 @@ class Roverchip:
 
 
     def draw_level(self, level):
+        """Initialize the level background and the current position of sprites.
+        Called when new levels are loaded, and after resizing."""
         # init background
         self.background = pygame.Surface((level.width * self.tilesize, level.height * self.tilesize))
         for x, y in level.cells:
@@ -62,6 +66,8 @@ class Roverchip:
         
         
     def find_offset(self, level):
+        """Return the top and left offset of the view relative to the
+        entire area of the level."""
         px, py = level.player.pos
         vw, vh = self.viewsize
         
@@ -77,6 +83,7 @@ class Roverchip:
 
         
     def loop(self, level):
+        """The event loop for the running level."""
         dirkeys = K_UP, K_RIGHT, K_DOWN, K_LEFT
         
         self.draw_level(level)

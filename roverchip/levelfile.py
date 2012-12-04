@@ -24,6 +24,8 @@ class LevelFile:
             
     
     def get_levels(self):
+        """Read level data from the text file. This is a quick, dirty,
+        temporary level format."""
         levels = []
             
         for i, startline in enumerate(self.lines):
