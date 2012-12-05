@@ -9,17 +9,22 @@ class Crate(sprite.Sprite):
         self.is_solid = True
         
         
-    def after_move(self):
-        if self.level.get_cell(self.pos).get_type() == 'Fire':
-            self.to_move = 1
-        
-        elif (self.level.get_cell(self.pos).get_type() == 'Water'
-              and not self.level.get_sprites_in(self.pos, False, 'SunkenCrate')):
+    def start_turn(self):
+        # if it's entirely on a water cell, replace with a sunken crate
+        if (len(self.cells_in()) == 1
+            and self.level.get_cell(self.pos).get_type() == 'Water'
+            and not self.level.get_sprites_in(self.pos, False, 'SunkenCrate')
+            ):
             self.kill()
             
             sunken = SunkenCrate(self.level, self.pos)
             self.level.sprites.add(sunken)
             sunken.after_move()
+
+    
+    def after_move(self):
+        if self.level.get_cell(self.pos).get_type() == 'Fire':
+            self.to_move = 1
 
 
 
