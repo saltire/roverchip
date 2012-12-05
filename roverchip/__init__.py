@@ -119,7 +119,8 @@ class Roverchip:
                             
             # execute frame for all sprites in layer order
             for sprite in level.sprites.sprites():
-                sprite.do_turn(elapsed)
+                sprite.start_turn()
+                sprite.do_move(elapsed)
             
             # get offset and draw background
             left, top = self.find_offset(level)

@@ -41,11 +41,9 @@ class Sprite(pygame.sprite.Sprite):
             ])
             
             
-    def do_turn(self, elapsed=0):
+    def do_move(self, elapsed=0):
         """Run any hooks at the start of an object's turn, do any movement,
         and run any hooks if it is finished moving."""
-        self.start_turn()
-
         if elapsed > 0 and self.to_move:
             distance = self.speed * elapsed
             dirx, diry = [(0, -1), (1, 0), (0, 1), (-1, 0)][self.facing]

@@ -7,5 +7,5 @@ class Fire(cell.Cell):
         
         self.colour = 64, 64, 64
         self.player_can_enter = False
-        self.robot_can_enter = False
+        self.robot_can_enter = True
         

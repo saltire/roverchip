@@ -42,7 +42,8 @@ class Player(sprite.Sprite):
                         self.start_move()
                         
                 # check that the square does not contain any immovable objects
-                elif not self.level.get_solid_sprites_in(nextcell):
+                elif not any(sprite.get_type() != 'Rover'
+                           for sprite in self.level.get_solid_sprites_in(nextcell, False)):
                     self.start_move()
                     
                     

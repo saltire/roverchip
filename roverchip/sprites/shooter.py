@@ -10,19 +10,13 @@ class Shooter(sprite.Sprite):
         self.is_destructible = True
         
     
-    def start_turn(self):
-        """Calculate the shooter's sight line."""
-        self.path = []
+    def check_collisions(self):
+        """Kill the player if he is fully in the shooter's sightline."""
         cell = self.pos
         while True:
             cell = self.level.get_neighbour(cell, self.facing)
             if not cell or not self.level.object_can_enter(cell) or self.level.get_solid_sprites_in(cell):
                 break
-            self.path.append(cell)
-            
-            
-    def check_collisions(self):
-        """Kill the player or Rover if they are fully in the shooter's sightline."""
-        for pos in self.path:
-            for sprite in self.level.get_sprites_in(pos, True, 'Player', 'Rover'):
+
+            for sprite in self.level.get_sprites_in(cell, True, 'Player'):
                 sprite.kill()

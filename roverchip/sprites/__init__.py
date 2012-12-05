@@ -9,3 +9,4 @@ from player import Player
 from robot import Robot
 from rover import Rover
 from shooter import Shooter
+from tank import Tank

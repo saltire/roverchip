@@ -18,7 +18,7 @@ class LevelFile:
              ]
     
     sprites = ['ball', 'cart', 'crate', 'door', 'key', 'laser', 'mirror',
-               'player', 'robot', 'rover', 'shooter']
+               'player', 'robot', 'rover', 'shooter', 'tank']
     
     
     def __init__(self, path):
