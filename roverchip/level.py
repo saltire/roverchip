@@ -10,7 +10,8 @@ class Level:
         # init map
         self.cells = {}
         for pos, cdata in celldata.items():
-            self.cells[pos] = getattr(cells, cdata[0])(self, *cdata[1:])
+            self.cells[pos] = getattr(getattr(cells, cdata[0]),
+                                      cdata[0].capitalize())(self, *cdata[1:])
         self.width = len(set(x for x, _ in self.cells))
         self.height = len(set(y for _, y in self.cells))
                 
@@ -18,7 +19,8 @@ class Level:
         self.sprites = pygame.sprite.LayeredUpdates()
         
         for sdata in spritedata:
-            sprite = getattr(sprites, sdata[0].capitalize())(self, sdata[1:3], *sdata[3:])
+            sprite = getattr(getattr(sprites, sdata[0]),
+                             sdata[0].capitalize())(self, sdata[1:3], *sdata[3:])
             self.sprites.add(sprite, layer=sprite.layer)
             
             if sdata[0] == 'player':

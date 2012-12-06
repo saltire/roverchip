@@ -1,12 +1,5 @@
-from ball import Ball
-from cart import Cart
-from crate import Crate
-from door import Door
-from key import Key
-from laser import Laser
-from mirror import Mirror
-from player import Player
-from robot import Robot
-from rover import Rover
-from shooter import Shooter
-from tank import Tank
+import os
+
+for module in os.listdir(os.path.dirname(__file__)):
+    if module != '__init__.py' and module[-3:] == '.py':
+        __import__(module[:-3], globals())

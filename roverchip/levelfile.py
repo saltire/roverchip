@@ -5,16 +5,16 @@ import level
 
 
 class LevelFile:
-    cells = [('Floor',),
-             ('Wall',),
-             ('Fire',),
-             ('Water',),
-             ('Water', 0), # n
-             ('Water', 1), # e
-             ('Water', 2), # s
-             ('Water', 3), # w
-             ('Grate',),
-             ('Exit',),
+    cells = [('floor',),
+             ('wall',),
+             ('fire',),
+             ('water',),
+             ('water', 0), # n
+             ('water', 1), # e
+             ('water', 2), # s
+             ('water', 3), # w
+             ('grate',),
+             ('exit',),
              ]
     
     sprites = ['ball', 'cart', 'crate', 'door', 'key', 'laser', 'mirror',
@@ -71,7 +71,7 @@ class LevelFile:
                     pass # eof
                 
                 # check that there is exactly 1 exit
-                if Counter(celldata.values())[('Exit',)] != 1:
+                if Counter(celldata.values())[('exit',)] != 1:
                     raise Exception('should be exactly 1 exit in level {0}'.format(len(levels) + 1))
                 
                 # check that there is exactly 1 player and 1 rover

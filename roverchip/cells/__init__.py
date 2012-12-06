@@ -1,6 +1,5 @@
-from exit import Exit
-from fire import Fire
-from floor import Floor
-from grate import Grate
-from wall import Wall
-from water import Water
+import os
+
+for module in os.listdir(os.path.dirname(__file__)):
+    if module != '__init__.py' and module[-3:] == '.py':
+        __import__(module[:-3], globals())
