@@ -7,7 +7,7 @@ import levelfile
 
 
 class Roverchip:
-    def __init__(self, levelpath):
+    def __init__(self, levelpath, tilepath, tileres):
         pygame.init()
         
         # init clock
@@ -17,6 +17,10 @@ class Roverchip:
         # init keyboard settings
         pygame.key.set_repeat(1, 50)
 
+        # init sprite tileset
+        self.tileimg = pygame.image.load(tilepath)
+        self.tiledims = self.tileimg.get_width() / tileres, self.tileimg.get_height() / tileres
+        
         # init window
         tilesize = 75
         self.viewsize = 10, 6
@@ -45,22 +49,28 @@ class Roverchip:
         self.left, self.top = int((width - self.width) / 2), int((height - self.height) / 2)
         self.view = self.window.subsurface((self.left, self.top, self.width, self.height))
 
+        # init tileset
+        tilew, tileh = self.tiledims
+        self.tileset = pygame.transform.scale(self.tileimg.convert_alpha(),
+                                                    (tilew * self.tilesize, tileh * self.tilesize))
+        
 
     def draw_level(self, level):
         """Initialize the level background and the current position of sprites.
         Called when new levels are loaded, and after resizing."""
         # init background
         self.background = pygame.Surface((level.width * self.tilesize, level.height * self.tilesize))
-        for x, y in level.cells:
-            rect = x * self.tilesize, y * self.tilesize, self.tilesize, self.tilesize
-            self.background.fill(level.get_cell((x, y)).colour, rect)
+        for cx, cy in level.cells:
+            tx, ty = level.get_cell((cx, cy)).tile
+            self.background.blit(self.tileset, (cx * self.tilesize, cy * self.tilesize),
+                                 (tx * self.tilesize, ty * self.tilesize, self.tilesize, self.tilesize))
             
         # draw background
         left, top = self.find_offset(level)
         self.view.blit(self.background, (0, 0), (left, top, self.width, self.height))
 
         # draw sprites
-        level.sprites.update(self.tilesize, (left, top))
+        level.sprites.update(self.tilesize, (left, top), self.tileset)
         level.sprites.draw(self.view)
 
         # update display
@@ -127,7 +137,7 @@ class Roverchip:
             self.view.blit(self.background, (0, 0), (left, top, self.width, self.height))
 
             # update sprite positions, check for collisions, draw sprites
-            level.sprites.update(self.tilesize, (left, top))
+            level.sprites.update(self.tilesize, (left, top), self.tileset)
             for sprite in level.sprites.sprites():
                 sprite.check_collisions()
                 
@@ -149,4 +159,4 @@ class Roverchip:
 
 
 if __name__ == '__main__':
-    Roverchip('levels.txt')
+    Roverchip('levels.txt', 'tiles.png', 16)

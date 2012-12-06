@@ -4,7 +4,7 @@ import sprite
 class Robot(sprite.Sprite):
     def __init__(self, level, pos, facing=0, follow=0):
         sprite.Sprite.__init__(self, level, pos, facing)
-        self.colour = 255, 0, 0
+        self.tile = 3, 2
         self.speed = 1.5
         self.is_solid = True
         self.is_enemy = True

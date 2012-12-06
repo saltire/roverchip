@@ -2,7 +2,7 @@ class Cell:
     def __init__(self, level):
         self.level = level
         
-        self.colour = 255, 255, 255
+        self.tile = 0, 0
         self.player_can_enter = True
         self.robot_can_enter = True
         self.object_can_enter = True

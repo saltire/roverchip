@@ -14,7 +14,7 @@ class Sprite(pygame.sprite.Sprite):
         self.to_move = 0
         
         # defaults to override
-        self.colour = 0, 0, 0
+        self.tile = 0, 0
         self.layer = 0
         self.size = 1
         self.speed = 1
@@ -62,7 +62,7 @@ class Sprite(pygame.sprite.Sprite):
                 self.after_move()
         
         
-    def update(self, tilesize, offset):
+    def update(self, tilesize, offset, tileset):
         """Draw the actual sprite."""
         # either initialize image and rect, or just update rect
         x, y = self.pos
@@ -72,10 +72,12 @@ class Sprite(pygame.sprite.Sprite):
         size = tilesize * self.size
         
         if not hasattr(self, 'image') or tilesize != self.image.get_width():
-            self.image = pygame.Surface((size, size))
-            if len(self.colour) > 3:
-                self.image = self.image.convert_alpha()
-            self.image.fill(self.colour)
+            # draw a new surface from its tile coords on the tileset image
+            self.image = pygame.Surface((size, size), pygame.SRCALPHA)
+            tx, ty = self.tile
+            self.image.blit(tileset, (0, 0),
+                            (tx * tilesize, ty * tilesize, tilesize, tilesize))
+            
             self.rect = pygame.Rect(left, top, size, size)
         else:
             self.rect.left, self.rect.top = left, top

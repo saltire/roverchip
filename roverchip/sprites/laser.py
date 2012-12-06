@@ -6,7 +6,7 @@ import sprite
 class Laser(sprite.Sprite):
     def __init__(self, level, pos, facing):
         sprite.Sprite.__init__(self, level, pos, facing)
-        self.colour = 192, 64, 0
+        self.tile = 4, 1
         self.layer = 3
         self.is_solid = True
         self.is_destructible = True
@@ -55,7 +55,7 @@ class Laser(sprite.Sprite):
 class Laserbeam(sprite.Sprite):    
     def __init__(self, level, pos, dirs):
         sprite.Sprite.__init__(self, level, pos)
-        self.colour = 192, 64, 0, 128
+        self.tile = 5, 1
         self.layer = 2
 
         self.dirs = dirs

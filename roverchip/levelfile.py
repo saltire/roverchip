@@ -23,7 +23,7 @@ class LevelFile:
     
     def __init__(self, path):
         with open(path) as lfile:
-            self.lines = [line.strip() for line in lfile.readlines() if line.strip() and line[0] != '#']
+            self.lines = [line.strip() for line in lfile if line.strip() and line[0] != '#']
             
     
     def get_levels(self):

@@ -4,7 +4,7 @@ import sprite
 class Cart(sprite.Sprite):   
     def __init__(self, level, pos):
         sprite.Sprite.__init__(self, level, pos)
-        self.colour = 255, 128, 192
+        self.tile = 1, 1
         self.speed = 5
         self.is_movable = True
         self.is_solid = True
