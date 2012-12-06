@@ -36,8 +36,8 @@ class LevelFile:
                 i += 1
                 starti = i
                 
-                mapdata = {}
-                sprites = []
+                celldata = {}
+                spritedata = []
                 
                 try:
                     # collect map data
@@ -47,11 +47,11 @@ class LevelFile:
                             width = len(self.lines[i])
                         if not self.lines[i].isdigit() or len(self.lines[i]) != width:
                             break
-                        mapdata.update({(x, i - starti): self.cells[int(celltype)]
+                        celldata.update({(x, i - starti): self.cells[int(celltype)]
                                         for x, celltype in enumerate(self.lines[i])})
                         i += 1
                         
-                    if not mapdata:
+                    if not celldata:
                         raise Exception('invalid level format at line {0}:\n{1}'.format(i, self.lines[i]))
                             
                     # collect sprite data
@@ -63,7 +63,7 @@ class LevelFile:
                         if match.group(1) not in self.sprites:
                             raise Exception('invalid sprite data at line {0}'.format(i))
                         
-                        sprites.append((match.group(1),)
+                        spritedata.append((match.group(1),)
                                        + tuple(int(x) for x in match.group(2).split(',')))
                         i += 1
                 
@@ -71,18 +71,18 @@ class LevelFile:
                     pass # eof
                 
                 # check that there is exactly 1 exit
-                if Counter(mapdata.values())[('Exit',)] != 1:
+                if Counter(celldata.values())[('Exit',)] != 1:
                     raise Exception('should be exactly 1 exit in level {0}'.format(len(levels) + 1))
                 
                 # check that there is exactly 1 player and 1 rover
                 for stype in ('player', 'rover'):
-                    scount = len([True for sprite in sprites if sprite[0] == stype])
+                    scount = len([True for sprite in spritedata if sprite[0] == stype])
                     if scount == 0:
                         raise Exception('missing {0} data in level {1}'.format(stype, len(levels) + 1))
                     elif scount > 1:
                         raise Exception('multiple {0} data in level {1}'.format(stype, len(levels) + 1))
                     
                 
-                levels.append(level.Level(mapdata, sprites))
+                levels.append(level.Level(celldata, spritedata))
 
         return levels

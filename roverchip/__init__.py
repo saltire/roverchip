@@ -7,7 +7,7 @@ import levelfile
 
 
 class Roverchip:
-    def __init__(self, levelpath, tilepath, tileres):
+    def __init__(self, levelpath, tilepath, tilesize):
         pygame.init()
         
         # init clock
@@ -19,13 +19,13 @@ class Roverchip:
 
         # init sprite tileset
         self.tileimg = pygame.image.load(tilepath)
-        self.tiledims = self.tileimg.get_width() / tileres, self.tileimg.get_height() / tileres
+        self.tiledims = self.tileimg.get_width() / tilesize, self.tileimg.get_height() / tilesize
         
         # init window
-        tilesize = 75
+        cellsize = 80
         self.viewsize = 10, 6
         vw, vh = self.viewsize
-        self.init_window((vw * tilesize, vh * tilesize))
+        self.init_window((vw * cellsize, vh * cellsize))
         
         # start loop
         # init map
@@ -44,33 +44,39 @@ class Roverchip:
         
         # init screen of proper size within the window
         vw, vh = self.viewsize
-        self.tilesize = min(width / vw, height / vh)
-        self.width, self.height = vw * self.tilesize, vh * self.tilesize
+        self.cellsize = min(width / vw, height / vh)
+        self.width, self.height = vw * self.cellsize, vh * self.cellsize
         self.left, self.top = int((width - self.width) / 2), int((height - self.height) / 2)
         self.view = self.window.subsurface((self.left, self.top, self.width, self.height))
 
         # init tileset
         tilew, tileh = self.tiledims
         self.tileset = pygame.transform.scale(self.tileimg.convert_alpha(),
-                                                    (tilew * self.tilesize, tileh * self.tilesize))
+                                                    (tilew * self.cellsize, tileh * self.cellsize))
         
 
     def draw_level(self, level):
         """Initialize the level background and the current position of sprites.
         Called when new levels are loaded, and after resizing."""
         # init background
-        self.background = pygame.Surface((level.width * self.tilesize, level.height * self.tilesize))
+        self.background = pygame.Surface((level.width * self.cellsize, level.height * self.cellsize))
+        
+        tiles = {}
         for cx, cy in level.cells:
-            tx, ty = level.get_cell((cx, cy)).tile
-            self.background.blit(self.tileset, (cx * self.tilesize, cy * self.tilesize),
-                                 (tx * self.tilesize, ty * self.tilesize, self.tilesize, self.tilesize))
+            cell = level.get_cell((cx, cy))
+            tx, ty = cell.tile
+            tilerect = [i * self.cellsize for i in (tx, ty, 1, 1)]
+            tileimg = tiles.setdefault(cell.tile, self.tileset.subsurface(tilerect))
+            if cell.rotate != 0:
+                tileimg = pygame.transform.rotate(tileimg, cell.rotate * -90)
+            self.background.blit(tileimg, (cx * self.cellsize, cy * self.cellsize))
             
         # draw background
         left, top = self.find_offset(level)
         self.view.blit(self.background, (0, 0), (left, top, self.width, self.height))
 
         # draw sprites
-        level.sprites.update(self.tilesize, (left, top), self.tileset)
+        level.sprites.update(self.cellsize, (left, top), self.tileset)
         level.sprites.draw(self.view)
 
         # update display
@@ -91,7 +97,7 @@ class Roverchip:
         left = max(0, min(ox, level.width - vw))
         top = max(0, min(oy, level.height - vh))
         
-        return int(left * self.tilesize), int(top * self.tilesize)
+        return int(left * self.cellsize), int(top * self.cellsize)
 
         
     def loop(self, level):
@@ -137,7 +143,7 @@ class Roverchip:
             self.view.blit(self.background, (0, 0), (left, top, self.width, self.height))
 
             # update sprite positions, check for collisions, draw sprites
-            level.sprites.update(self.tilesize, (left, top), self.tileset)
+            level.sprites.update(self.cellsize, (left, top), self.tileset)
             for sprite in level.sprites.sprites():
                 sprite.check_collisions()
                 

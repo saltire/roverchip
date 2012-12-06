@@ -6,8 +6,10 @@ import sprite
 class Laser(sprite.Sprite):
     def __init__(self, level, pos, facing):
         sprite.Sprite.__init__(self, level, pos, facing)
+        
         self.tile = 4, 1
         self.layer = 3
+        self.rotate = True
         self.is_solid = True
         self.is_destructible = True
         
@@ -55,10 +57,24 @@ class Laser(sprite.Sprite):
 class Laserbeam(sprite.Sprite):    
     def __init__(self, level, pos, dirs):
         sprite.Sprite.__init__(self, level, pos)
-        self.tile = 5, 1
+        
         self.layer = 2
+        self.rotate = True
 
-        self.dirs = dirs
+        in_dir, out_dir = dirs
+        beamtype = (in_dir - out_dir) % 4
+        # beam goes straight
+        if beamtype == 0:
+            self.tile = 5, 1
+            self.facing = out_dir
+        # beam turns right
+        elif beamtype == 3:
+            self.tile = 6, 1
+            self.facing = out_dir
+        # beam turns left
+        elif beamtype == 1:
+            self.tile = 6, 1
+            self.facing = (out_dir - 1) % 4
 
 
     def check_collisions(self):

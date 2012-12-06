@@ -4,8 +4,9 @@ import sprite
 class Shooter(sprite.Sprite):
     def __init__(self, level, pos, facing):
         sprite.Sprite.__init__(self, level, pos, facing)
-        self.tile = 2, 2
         
+        self.tile = 2, 2
+        self.rotate = True
         self.is_solid = True
         self.is_destructible = True
         

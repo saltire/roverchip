@@ -3,14 +3,15 @@ import sprite
 
 class Mirror(sprite.Sprite):
     def __init__(self, level, pos, facing):
-        sprite.Sprite.__init__(self, level, pos)
+        sprite.Sprite.__init__(self, level, pos, facing)
+        
         self.tile = 7, 1
         self.is_movable = True
         self.is_solid = True
         
-        # facing = diagonal dir the mirror is facing: 0-3, clockwise from northwest
+        # facing = diagonal dir the mirror is facing: 0-3, clockwise from northeast
         # self.dirs = the two cardinal dirs the mirror is facing
-        self.dirs = (facing, (facing - 1) % 4)
+        self.dirs = (facing, (facing + 1) % 4)
         
         
     def get_out_dir(self, in_dir):

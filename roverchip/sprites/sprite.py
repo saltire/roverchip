@@ -8,19 +8,22 @@ class Sprite(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         
         # initial values
-        self.level = level
-        self.pos = pos
-        self.facing = facing
-        self.to_move = 0
+        self.level = level              # reference to level
+        self.pos = pos                  # sprite's coords on cell grid
+        self.facing = facing            # direction sprite is facing
+        self.tile_facing = facing       # direction tile is facing
+        self.to_move = 0                # tiles left to move
+        self.move_dir = 0               # direction to move
         
         # defaults to override
-        self.tile = 0, 0
-        self.layer = 0
-        self.size = 1
-        self.speed = 1
+        self.tile = 0, 0                # coords of sprite's tile in tileset
+        self.layer = 0                  # layer the sprite is rendered on
+        self.size = 1                   # size of sprite in cells
+        self.speed = 1                  # move speed
+        self.rotate = False             # tile rotates according to self.facing
         self.is_movable = False         # can be pushed by player
-        self.is_solid = False           # will stop things from entering its square
-        self.is_enemy = False           # will kill player on touch
+        self.is_solid = False           # will stop things from entering its cell
+        self.is_enemy = False           # will kill player on entering his cell
         self.is_item = False            # can be picked up by player
         self.is_destructible = False    # will be destroyed by laserbeams
         
@@ -46,7 +49,7 @@ class Sprite(pygame.sprite.Sprite):
         and run any hooks if it is finished moving."""
         if elapsed > 0 and self.to_move:
             distance = self.speed * elapsed
-            dirx, diry = [(0, -1), (1, 0), (0, 1), (-1, 0)][self.facing]
+            dirx, diry = ((0, -1), (1, 0), (0, 1), (-1, 0))[self.move_dir]
             dx, dy = dirx * distance, diry * distance
             
             if abs(dx) > self.to_move:
@@ -62,21 +65,27 @@ class Sprite(pygame.sprite.Sprite):
                 self.after_move()
         
         
-    def update(self, tilesize, offset, tileset):
+    def update(self, cellsize, offset, tileset):
         """Draw the actual sprite."""
         # either initialize image and rect, or just update rect
         x, y = self.pos
         ox, oy = offset
-        left = (x + (1 - self.size) / 2) * tilesize - ox
-        top = (y + (1 - self.size) / 2) * tilesize - oy
-        size = tilesize * self.size
+        left = (x + (1 - self.size) / 2) * cellsize - ox
+        top = (y + (1 - self.size) / 2) * cellsize - oy
+        size = cellsize * self.size
         
-        if not hasattr(self, 'image') or tilesize != self.image.get_width():
+        if (not hasattr(self, 'image') or cellsize != self.image.get_width()
+            or self.tile_facing != self.facing):
+            
             # draw a new surface from its tile coords on the tileset image
             self.image = pygame.Surface((size, size), pygame.SRCALPHA)
+            
             tx, ty = self.tile
-            self.image.blit(tileset, (0, 0),
-                            (tx * tilesize, ty * tilesize, tilesize, tilesize))
+            tileimg = tileset.subsurface((tx * cellsize, ty * cellsize, cellsize, cellsize))
+            tileimg = pygame.transform.rotate(tileimg, self.facing * -90)
+            self.tile_facing = self.facing
+            
+            self.image.blit(tileimg, (0, 0))
             
             self.rect = pygame.Rect(left, top, size, size)
         else:

@@ -5,14 +5,14 @@ import sprites
 
 
 class Level:
-    def __init__(self, mapdata, spritedata):
+    def __init__(self, celldata, spritedata):
         """Initialize all the cells and sprites, and add them to groups."""
         # init map
         self.cells = {}
-        for pos, celldata in mapdata.items():
-            self.cells[pos] = getattr(cells, celldata[0])(self, *celldata[1:])
-        self.width = len(set(x for x, y in self.cells))
-        self.height = len(set(y for x, y in self.cells))
+        for pos, cdata in celldata.items():
+            self.cells[pos] = getattr(cells, cdata[0])(self, *cdata[1:])
+        self.width = len(set(x for x, _ in self.cells))
+        self.height = len(set(y for _, y in self.cells))
                 
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()

@@ -6,9 +6,12 @@ import sprite
 class Player(sprite.Sprite):   
     def __init__(self, level, pos, facing=0):
         sprite.Sprite.__init__(self, level, pos, facing)
+        
         self.tile = 0, 2
+        self.facing = 2
         self.layer = 1
         self.speed = 4
+        self.rotate = True
         self.is_destructible = True
         
         self.following = pygame.sprite.Group()
@@ -16,12 +19,13 @@ class Player(sprite.Sprite):
         self.inv = pygame.sprite.Group()
         
 
-    def try_move(self, movedir):
+    def try_move(self, move_dir):
         """Check if movement is possible in the given direction, and if so,
         initiate movement."""
         if not self.to_move:
-            self.facing = movedir
-            nextcell = self.level.get_neighbour(self.pos, movedir)
+            self.facing = move_dir
+            self.move_dir = move_dir
+            nextcell = self.level.get_neighbour(self.pos, move_dir)
             # check if the square to move to exists and can be moved into
             if nextcell and self.level.player_can_enter(nextcell):
                 door = self.level.get_sprites_in(nextcell, False, 'Door')
@@ -33,7 +37,7 @@ class Player(sprite.Sprite):
                 # check if the square contains a movable object and if there is room to push it
                 movables = self.level.get_movables_in(nextcell)
                 if movables:
-                    nextcell2 = self.level.get_neighbour(nextcell, movedir)
+                    nextcell2 = self.level.get_neighbour(nextcell, move_dir)
                     if (nextcell2 and self.level.object_can_enter(nextcell2)
                         and not self.level.get_solid_sprites_in(nextcell2, False)
                         and not self.level.get_enemies_in(nextcell2, False)
@@ -55,13 +59,15 @@ class Player(sprite.Sprite):
         # also move items in inventory
         for item in set(self.pushing.sprites() + self.inv.sprites()):
             item.speed = max(item.speed, self.speed)
-            item.facing = self.facing
+            item.move_dir = self.move_dir
             item.to_move = 1
             
         # move rover
         for follower in self.following.sprites():
+            move_dir = self.level.get_dir(follower.pos, self.pos)
+            follower.facing = move_dir
+            follower.move_dir = move_dir
             follower.speed = self.speed
-            follower.facing = self.level.get_dir(follower.pos, self.pos)
             follower.to_move = 1
     
     

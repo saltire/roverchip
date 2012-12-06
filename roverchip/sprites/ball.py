@@ -4,6 +4,7 @@ import sprite
 class Ball(sprite.Sprite):   
     def __init__(self, level, pos):
         sprite.Sprite.__init__(self, level, pos)
+        
         self.tile = 0, 1
         self.speed = 5
         self.is_movable = True
@@ -20,7 +21,7 @@ class Ball(sprite.Sprite):
         
     
     def after_move(self):
-        nextcell = self.level.get_neighbour(self.pos, self.facing)
+        nextcell = self.level.get_neighbour(self.pos, self.move_dir)
         if self.level.object_can_enter(nextcell) and not self.level.get_solid_sprites_in(nextcell):
             self.to_move = 1
             

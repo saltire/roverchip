@@ -21,9 +21,9 @@ shooter:16,4,3
 shooter:16,5,3
 shooter:21,6,3
 laser:	7,6,0
-mirror: 7,3,2
-mirror: 20,1,3
-mirror: 19,7,1
+mirror: 7,3,1
+mirror: 20,1,2
+mirror: 19,7,0
 key:	18,6
 door:	5,4,1
 
@@ -87,10 +87,10 @@ key:	17,10
 laser:	1,4,1
 laser:	15,6,3
 laser:	4,8,1
-mirror: 2,2,2
-mirror: 15,2,3
-mirror: 2,9,1
-mirror: 15,9,0
+mirror: 2,2,1
+mirror: 15,2,2
+mirror: 2,9,0
+mirror: 15,9,3
 ball:	9,3
 crate: 4,10
 
