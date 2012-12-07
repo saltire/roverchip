@@ -7,6 +7,7 @@ class Key(sprite.Sprite):
         
         self.tile = 6, colour + 2
         self.layer = 2
+        self.size = 0.5
         self.is_item = True
         
         self.colour = colour

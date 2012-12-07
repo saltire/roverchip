@@ -72,23 +72,31 @@ class Sprite(pygame.sprite.Sprite):
         ox, oy = offset
         left = (x + (1 - self.size) / 2) * cellsize - ox
         top = (y + (1 - self.size) / 2) * cellsize - oy
-        size = cellsize * self.size
+        size = int(cellsize * self.size)
         
         if (not hasattr(self, 'image') or cellsize != self.image.get_width()
             or self.tile_facing != self.facing):
             
-            # draw a new surface from its tile coords on the tileset image
-            self.image = pygame.Surface((size, size), pygame.SRCALPHA)
-            
+            # grab tile from tileset
             tx, ty = self.tile
             tileimg = tileset.subsurface((tx * cellsize, ty * cellsize, cellsize, cellsize))
+            
+            # rotate and scale tile
             tileimg = pygame.transform.rotate(tileimg, self.facing * -90)
             self.tile_facing = self.facing
             
+            if self.size != 1:
+                tileimg = pygame.transform.scale(tileimg, (size, size))
+            
+            # draw a new surface for the sprite using the tile
+            self.image = pygame.Surface((size, size), pygame.SRCALPHA)
             self.image.blit(tileimg, (0, 0))
             
+            # set position
             self.rect = pygame.Rect(left, top, size, size)
+
         else:
+            # just set position
             self.rect.left, self.rect.top = left, top
             
             
