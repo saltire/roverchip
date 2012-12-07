@@ -29,10 +29,12 @@ class Player(sprite.Sprite):
             # check if the square to move to exists and can be moved into
             if nextcell and self.level.player_can_enter(nextcell):
                 door = self.level.get_sprites_in(nextcell, False, 'Door')
-                key = self.get_carried_items('Key')
-                if door and key:
-                    door[0].kill()
-                    key[0].kill()
+                if door:
+                    key = [key for key in self.get_carried_items('Key') if key.colour == door[0].colour]
+                    if key:
+                        door[0].kill()
+                        if key[0].colour != 0:
+                            key[0].kill()
                 
                 # check if the square contains a movable object and if there is room to push it
                 movables = self.level.get_movables_in(nextcell)
