@@ -17,7 +17,7 @@ class LevelFile:
              ('exit',),
              ]
     
-    sprites = ['ball', 'cart', 'crate', 'door', 'key', 'laser', 'mirror',
+    sprites = ['ball', 'cart', 'chip', 'crate', 'door', 'key', 'laser', 'mirror',
                'player', 'robot', 'rover', 'shooter', 'tank']
     
     
@@ -56,32 +56,33 @@ class LevelFile:
                             
                     # collect sprite data
                     while True:
-                        match = re.match('(\w+):\s*((\d+,\s*)*\d+)', self.lines[i])
+                        match = re.match('(\w+):\s*(((\d+,\s*)*\d+\s*)+)', self.lines[i])
                         if not match:
                             break
                         
                         if match.group(1) not in self.sprites:
                             raise Exception('invalid sprite data at line {0}'.format(i))
                         
-                        spritedata.append((match.group(1),)
-                                       + tuple(int(x) for x in match.group(2).split(',')))
+                        for sdata in match.group(2).split():
+                            spritedata.append((match.group(1),)
+                                              + tuple(int(x) for x in sdata.split(',')))
                         i += 1
                 
                 except IndexError:
                     pass # eof
                 
-                # check that there is exactly 1 exit
-                if Counter(celldata.values())[('exit',)] != 1:
-                    raise Exception('should be exactly 1 exit in level {0}'.format(len(levels) + 1))
-                
-                # check that there is exactly 1 player and 1 rover
-                for stype in ('player', 'rover'):
-                    scount = len([True for sprite in spritedata if sprite[0] == stype])
-                    if scount == 0:
-                        raise Exception('missing {0} data in level {1}'.format(stype, len(levels) + 1))
-                    elif scount > 1:
-                        raise Exception('multiple {0} data in level {1}'.format(stype, len(levels) + 1))
-                    
+                # check for illegal counts of cells and sprites
+                ccount = Counter(cell[0] for cell in celldata.values())
+                scount = Counter(sprite[0] for sprite in spritedata)
+                if ccount['exit'] != 1:
+                    raise Exception('must be exactly 1 exit in level {0}'
+                                    .format(len(levels) + 1))
+                if scount['player'] != 1:
+                    raise Exception('must be exactly 1 player in level {0}'
+                                    .format(len(levels) + 1))
+                if scount['rover'] == 0 and scount['chip'] == 0:
+                    raise Exception('must be at least 1 rover or chip in level {0}'
+                                    .format(len(levels) + 1))
                 
                 levels.append(level.Level(celldata, spritedata))
 

@@ -77,7 +77,10 @@ class Player(sprite.Sprite):
         """Run checks for items in the new square, and clean up movement actions."""
         # pick up items
         for item in self.level.get_items_in(self.pos):
-            if not self.inv.has(item):
+            if item.get_type() == 'Chip':
+                item.kill()
+                
+            elif not self.inv.has(item):
                 self.inv.add(item)
             
         # stop pushing objects
@@ -94,7 +97,8 @@ class Player(sprite.Sprite):
         """Check to see if the level has been completed."""
         return (len(self.cells_in()) == 1
                 and self.level.get_cell(self.pos).get_type() == 'Exit'
-                and any(follower.get_type() == 'Rover' for follower in self.following))
+                and all(self.following.has(rover) for rover in self.level.get_sprites('Rover'))
+                and not self.level.get_sprites('Chip'))
         
         
     def get_carried_items(self, itype):

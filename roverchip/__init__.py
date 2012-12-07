@@ -150,7 +150,7 @@ class Roverchip:
             # check for death
             if not level.player.alive():
                 sys.exit('Ouch!')
-            if not level.rover.alive():
+            if hasattr(level, 'rover') and not level.rover.alive():
                 sys.exit('Arf!')
             
             # check for win condition
@@ -165,4 +165,4 @@ class Roverchip:
 
 
 if __name__ == '__main__':
-    Roverchip('levels.txt', 'tiles.png', 16)
+    Roverchip('chips.txt', 'tiles.png', 16)
