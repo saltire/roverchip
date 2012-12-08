@@ -7,26 +7,29 @@ import sprites
 class Level:
     def __init__(self, celldata, spritedata):
         """Initialize all the cells and sprites, and add them to groups."""
-        # init map
+        
+        # init map cells
         self.cells = {}
+        cellclasses = {}
+        
         for pos, cdata in celldata.items():
-            self.cells[pos] = getattr(getattr(cells, cdata[0]),
-                                      cdata[0].capitalize())(self, *cdata[1:])
+            cls = cellclasses.setdefault(cdata[0], self._get_class(cells, cdata[0]))
+            self.cells[pos] = cls(self, *cdata[1:])
+        
         self.width = len(set(x for x, _ in self.cells))
         self.height = len(set(y for _, y in self.cells))
                 
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()
+        spriteclasses = {}
         
         for sdata in spritedata:
-            sprite = getattr(getattr(sprites, sdata[0]),
-                             sdata[0].capitalize())(self, sdata[1:3], *sdata[3:])
+            cls = spriteclasses.setdefault(sdata[0], self._get_class(sprites, sdata[0]))
+            sprite = cls(self, sdata[1:3], *sdata[3:])
             self.sprites.add(sprite, layer=sprite.layer)
             
             if sdata[0] == 'player':
                 self.player = sprite
-            if sdata[0] == 'rover':
-                self.rover = sprite
                 
         # groups used for collisions
         self.destructibles = pygame.sprite.Group([sprite for sprite in self.sprites if sprite.is_destructible])
@@ -34,11 +37,23 @@ class Level:
         self.beams = pygame.sprite.Group()
         
         
+    def _get_class(self, package, name):
+        module = getattr(package, name)
+        for cls in dir(module):
+            if cls.lower() == name:
+                return getattr(module, cls)
+
+    
     # cell data
     
     def get_cell(self, pos):
         """Return the cell at the given coords."""
         return self.cells.get(pos)
+    
+    
+    def set_cell(self, pos, ctype, *opts):
+        """Replace the cell at the given coords with a new one."""
+        self.cells[pos] = self._get_class(cells, ctype)(self, pos, *opts)
     
     
     def player_can_enter(self, pos):

@@ -150,7 +150,7 @@ class Roverchip:
             # check for death
             if not level.player.alive():
                 sys.exit('Ouch!')
-            if hasattr(level, 'rover') and not level.rover.alive():
+            if any(not rover.alive() for rover in level.get_sprites('Rover')):
                 sys.exit('Arf!')
             
             # check for win condition
