@@ -8,7 +8,8 @@ class Tank(sprite.Sprite):
         sprite.Sprite.__init__(self, level, pos, facing)
         
         self.tile = 4, 2
-        self.speed = 1.5
+        self.layer = 1
+        self.speed = 500
         self.rotate = True
         self.is_solid = True
         self.is_enemy = True

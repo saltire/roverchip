@@ -19,7 +19,7 @@ class Sprite(pygame.sprite.Sprite):
         self.tile = 0, 0                # coords of sprite's tile in tileset
         self.layer = 0                  # layer the sprite is rendered on
         self.size = 1                   # size of sprite in cells
-        self.speed = 1                  # move speed
+        self.speed = 250               # number of ms to move one cell
         self.rotate = False             # tile rotates according to self.facing
         self.is_movable = False         # can be pushed by player
         self.is_solid = False           # will stop things from entering its cell
@@ -48,7 +48,7 @@ class Sprite(pygame.sprite.Sprite):
         """Run any hooks at the start of an object's turn, do any movement,
         and run any hooks if it is finished moving."""
         if elapsed > 0 and self.to_move:
-            distance = self.speed * elapsed
+            distance = elapsed / self.speed
             dirx, diry = ((0, -1), (1, 0), (0, 1), (-1, 0))[self.move_dir]
             dx, dy = dirx * distance, diry * distance
             

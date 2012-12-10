@@ -10,7 +10,7 @@ class Player(sprite.Sprite):
         self.tile = 0, 2
         self.facing = 2
         self.layer = 1
-        self.speed = 4
+        self.speed = 250
         self.rotate = True
         self.is_destructible = True
         
@@ -60,7 +60,7 @@ class Player(sprite.Sprite):
         
         # also move items in inventory
         for item in set(self.pushing.sprites() + self.inv.sprites()):
-            item.speed = max(item.speed, self.speed)
+            item.speed = min(item.speed, self.speed)
             item.move_dir = self.move_dir
             item.to_move = 1
             

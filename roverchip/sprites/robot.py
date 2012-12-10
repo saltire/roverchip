@@ -6,7 +6,8 @@ class Robot(sprite.Sprite):
         sprite.Sprite.__init__(self, level, pos, facing)
         
         self.tile = 3, 2
-        self.speed = 1.5
+        self.layer = 1
+        self.speed = 250
         self.rotate = True
         self.is_solid = True
         self.is_enemy = True

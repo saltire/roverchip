@@ -28,7 +28,6 @@ class Roverchip:
         self.init_window((vw * cellsize, vh * cellsize))
         
         # start loop
-        # init map
         for level in levelfile.LevelFile(levelpath).get_levels():
             self.loop(level)
             
@@ -109,8 +108,8 @@ class Roverchip:
         while True:
             # update clock
             old_time = self.time
-            self.time += self.clock.tick()
-            elapsed = min((self.time - old_time) / 1000.0, 0.015)
+            self.time += self.clock.tick(60)
+            elapsed = float(self.time - old_time)
             
             # handle events
             for event in pygame.event.get():
@@ -165,4 +164,4 @@ class Roverchip:
 
 
 if __name__ == '__main__':
-    Roverchip('chips.txt', 'tiles.png', 16)
+    Roverchip('levels.txt', 'tiles.png', 16)

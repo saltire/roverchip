@@ -6,6 +6,7 @@ class Crate(sprite.Sprite):
         sprite.Sprite.__init__(self, level, pos)
         
         self.tile = 2, 1
+        self.layer = 1
         self.is_movable = True
         self.is_solid = True
         
@@ -33,7 +34,7 @@ class SunkenCrate(sprite.Sprite):
     def __init__(self, level, pos):
         sprite.Sprite.__init__(self, level, pos)
         self.tile = 3, 1
-        self.speed = 2
+        self.speed = 250
         
         
     def after_move(self):

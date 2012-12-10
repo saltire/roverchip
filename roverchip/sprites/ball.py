@@ -6,7 +6,8 @@ class Ball(sprite.Sprite):
         sprite.Sprite.__init__(self, level, pos)
         
         self.tile = 0, 1
-        self.speed = 5
+        self.layer = 1
+        self.speed = 100
         self.is_movable = True
         self.is_solid = True
         

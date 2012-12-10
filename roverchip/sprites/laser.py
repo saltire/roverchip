@@ -42,11 +42,11 @@ class Laser(sprite.Sprite):
         if not self.level.object_can_enter(cell):
             return None
         
-        mirror = self.level.get_sprites_in(cell, False, 'Mirror')
+        mirror = self.level.get_sprites_in(cell, True, 'Mirror')
         if mirror:
             return mirror[0].get_out_dir(in_dir)
         
-        for sprite in self.level.get_solid_sprites_in(cell, True):
+        for sprite in self.level.get_solid_sprites_in(cell, False):
             if not sprite.is_destructible and sprite not in self.level.get_solid_sprites_in(self.level.get_neighbour(cell, in_dir), 1):
                 return None
         
