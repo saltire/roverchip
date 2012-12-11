@@ -5,25 +5,26 @@ import level
 
 
 class LevelFile:
-    cells = [('floor',),
-             ('wall',),
-             ('fire',),
-             ('water',),
-             ('water', 0), # n
-             ('water', 1), # e
-             ('water', 2), # s
-             ('water', 3), # w
-             ('grate',),
-             ('exit',),
-             ]
+    cells = {'-': ('floor',),
+             '0': ('wall',),
+             'x': ('fire',),
+             'W': ('water',),
+             '^': ('water', 0), # n
+             '>': ('water', 1), # e
+             'v': ('water', 2), # s
+             '<': ('water', 3), # w
+             '=': ('grate',),
+             '*': ('exit',)
+             }
     
-    sprites = ['ball', 'cart', 'chip', 'crate', 'door', 'key', 'laser', 'mirror',
+    sprites = ['ball', 'cart', 'chip', 'chipdoor', 'crate', 'door', 'key', 'laser', 'mirror',
                'player', 'robot', 'rover', 'shooter', 'tank']
     
     
     def __init__(self, path):
         with open(path) as lfile:
-            self.lines = [line.strip() for line in lfile if line.strip() and line[0] != '#']
+            self.lines = [(linenum, line.strip()) for linenum, line in enumerate(lfile)
+                          if line.strip() and line[0] != '#']
             
     
     def get_levels(self):
@@ -32,7 +33,7 @@ class LevelFile:
         levels = []
             
         for i, startline in enumerate(self.lines):
-            if startline[0] == '!':
+            if startline[1][0] == '!':
                 i += 1
                 starti = i
                 
@@ -43,25 +44,32 @@ class LevelFile:
                     # collect map data
                     width = None
                     while True:
+                        linenum, line = self.lines[i]
+                        
                         if width is None:
-                            width = len(self.lines[i])
-                        if not self.lines[i].isdigit() or len(self.lines[i]) != width:
+                            width = len(line)
+                            
+                        if not all(ctype in self.cells for ctype in line):
                             break
-                        celldata.update({(x, i - starti): self.cells[int(celltype)]
-                                        for x, celltype in enumerate(self.lines[i])})
+                        celldata.update({(x, i - starti): self.cells[ctype]
+                                        for x, ctype in enumerate(line)})
                         i += 1
                         
                     if not celldata:
-                        raise Exception('invalid level format at line {0}:\n{1}'.format(i, self.lines[i]))
+                        raise Exception('invalid level format at line {0}:\n{1}'
+                                        .format(linenum, line))
                             
                     # collect sprite data
                     while True:
-                        match = re.match('(\w+):\s*(((\d+,\s*)*\d+\s*)+)', self.lines[i])
+                        linenum, line = self.lines[i]
+                        
+                        match = re.match('(\w+):\s*(((\d+,\s*)*\d+\s*)+)', line)
                         if not match:
                             break
                         
-                        if match.group(1) not in self.sprites:
-                            raise Exception('invalid sprite data at line {0}'.format(i))
+                        if match.group(1).lower() not in self.sprites:
+                            raise Exception('invalid sprite data at line {0}:\n{1}'
+                                            .format(linenum, line))
                         
                         for sdata in match.group(2).split():
                             spritedata.append((match.group(1),)

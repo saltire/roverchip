@@ -41,17 +41,26 @@ class Player(sprite.Sprite):
             self.facing = self.move_key
             self.move_dir = self.move_key
             nextcell = self.level.get_neighbour(self.pos, self.move_dir)
-            # check if the square to move to exists and can be moved into
+            
+            # check if the cell to move to exists and can be moved into
             if nextcell and self.level.player_can_enter(nextcell):
+                
+                # remove chipdoor if all chips have been collected
+                chipdoor = self.level.get_sprites_in(nextcell, False, 'ChipDoor')
+                if chipdoor and not self.level.get_sprites('Chip'):
+                    chipdoor[0].kill()
+                
+                # remove door if carrying the matching key
                 door = self.level.get_sprites_in(nextcell, False, 'Door')
                 if door:
-                    key = [key for key in self.get_carried_items('Key') if key.colour == door[0].colour]
+                    key = [key for key in self.get_carried_items('Key')
+                           if key.colour == door[0].colour]
                     if key:
                         door[0].kill()
                         if key[0].colour != 0:
                             key[0].kill()
                 
-                # check if the square contains a movable object and if there is room to push it
+                # check if the cell contains a movable object and if there is room to push it
                 movables = self.level.get_movables_in(nextcell)
                 if movables:
                     nextcell2 = self.level.get_neighbour(nextcell, self.move_dir)
@@ -62,9 +71,9 @@ class Player(sprite.Sprite):
                         self.pushing.add(movables)
                         self.start_move()
                         
-                # check that the square does not contain any immovable objects
+                # check that the cell does not contain any immovable objects
                 elif not any(sprite.get_type() != 'Rover'
-                           for sprite in self.level.get_solid_sprites_in(nextcell, False)):
+                             for sprite in self.level.get_solid_sprites_in(nextcell, False)):
                     self.start_move()
                     
                     

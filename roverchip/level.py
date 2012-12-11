@@ -18,7 +18,7 @@ class Level:
         
         self.width = len(set(x for x, _ in self.cells))
         self.height = len(set(y for _, y in self.cells))
-                
+        
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()
         spriteclasses = {}
@@ -32,8 +32,8 @@ class Level:
                 self.player = sprite
                 
         # groups used for collisions
-        self.destructibles = pygame.sprite.Group([sprite for sprite in self.sprites if sprite.is_destructible])
-        self.enemies = pygame.sprite.Group([sprite for sprite in self.sprites if sprite.is_enemy])
+        self.destructibles = pygame.sprite.Group(sprite for sprite in self.sprites if sprite.is_destructible)
+        self.enemies = pygame.sprite.Group(sprite for sprite in self.sprites if sprite.is_enemy)
         self.beams = pygame.sprite.Group()
         
         
@@ -87,18 +87,11 @@ class Level:
     def get_dir(self, (x1, y1), (x2, y2)):
         """Return the direction the second cell is in, relative to the first."""
         if (x1 != x1 and y1 != y2) or (x1 == x2 and y1 == y2):
-            return False
-        if y2 < y1:
-            return 0
-        if x2 > x1:
-            return 1
-        if y2 > y1:
-            return 2
-        if x2 < x1:
-            return 3
+            return None
+        return (y2 < y1, x2 > x1, y2 > y1, x2 < x1).index(True)
         
         
-    # sprite data    
+    # sprite data
     
     def get_sprites(self, *types):
         """Return all sprites, optionally filtering by a sprite type."""
