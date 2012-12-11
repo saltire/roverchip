@@ -7,6 +7,7 @@ import sprites
 class Level:
     def __init__(self, celldata, spritedata):
         """Initialize all the cells and sprites, and add them to groups."""
+        self.redraw = True
         
         # init map cells
         self.cells = {}

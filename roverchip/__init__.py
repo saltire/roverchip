@@ -53,59 +53,61 @@ class Roverchip:
         # init tileset
         tilew, tileh = self.tiledims
         self.tileset = pygame.transform.scale(self.tileimg.convert_alpha(),
-                                                    (tilew * self.cellsize, tileh * self.cellsize))
+                                              (tilew * self.cellsize, tileh * self.cellsize))
         
 
-    def draw_level(self, level):
-        """Initialize the level background and the current position of sprites.
-        Called when new levels are loaded, and after resizing."""
-        # init background
-        self.background = pygame.Surface((level.width * self.cellsize, level.height * self.cellsize))
-        
-        tiles = {}
-        for cx, cy in level.cells:
-            cell = level.get_cell((cx, cy))
-            tx, ty = cell.tile
-            tilerect = [i * self.cellsize for i in (tx, ty, 1, 1)]
-            tileimg = tiles.setdefault(cell.tile, self.tileset.subsurface(tilerect))
-            if cell.rotate != 0:
-                tileimg = pygame.transform.rotate(tileimg, cell.rotate * -90)
-            self.background.blit(tileimg, (cx * self.cellsize, cy * self.cellsize))
-            
-        # draw background
-        left, top = self.find_offset(level)
-        self.view.blit(self.background, (0, 0), (left, top, self.width, self.height))
-
-        # draw sprites
-        level.sprites.update(self.cellsize, (left, top), self.tileset)
-        level.sprites.draw(self.view)
-
-        # update display
-        pygame.display.update()
-        
-        
-    def find_offset(self, level):
-        """Return the top and left offset of the view relative to the
-        entire area of the level."""
-        px, py = level.player.pos
-        vw, vh = self.viewsize
-        
-        # find offset that places the player in the centre
-        ox = px - (vw - 1) / 2.0
-        oy = py - (vh - 1) / 2.0
-        
-        # clamp values so as not to go off the edge
-        left = max(0, min(ox, level.width - vw))
-        top = max(0, min(oy, level.height - vh))
-        
-        return int(left * self.cellsize), int(top * self.cellsize)
-
-        
     def loop(self, level):
         """The event loop for the running level."""
-        self.draw_level(level)
-        
         while True:
+            # generate level background if redraw flag is on (it is initially)
+            if level.redraw:
+                background = pygame.Surface((level.width * self.cellsize, level.height * self.cellsize))
+                
+                tiles = {}
+                for cx, cy in level.cells:
+                    cell = level.get_cell((cx, cy))
+                    tx, ty = cell.tile
+                    tilerect = [i * self.cellsize for i in (tx, ty, 1, 1)]
+                    tileimg = tiles.setdefault(cell.tile, self.tileset.subsurface(tilerect))
+                    if cell.rotate != 0:
+                        tileimg = pygame.transform.rotate(tileimg, cell.rotate * -90)
+                    background.blit(tileimg, (cx * self.cellsize, cy * self.cellsize))
+                    
+                level.redraw = False
+                    
+            # find offset that places the player in the centre
+            px, py = level.player.pos
+            vw, vh = self.viewsize
+            ox = px - (vw - 1) / 2.0
+            oy = py - (vh - 1) / 2.0
+            
+            # clamp values so as not to go off the edge
+            ox = max(0, min(ox, level.width - vw))
+            oy = max(0, min(oy, level.height - vh))
+
+            # blit background onto the view
+            left, top = int(ox * self.cellsize), int(oy * self.cellsize)
+            self.view.blit(background, (0, 0), (left, top, self.width, self.height))
+
+            # update sprite positions, draw sprites, update display
+            level.sprites.update(self.cellsize, (left, top), self.tileset)
+            level.sprites.draw(self.view)
+            pygame.display.update()
+
+            # check collisions
+            for sprite in level.sprites.sprites():
+                sprite.check_collisions()
+
+            # check for death
+            if not level.player.alive():
+                sys.exit('Ouch!')
+            if any(not rover.alive() for rover in level.get_sprites('Rover')):
+                sys.exit('Arf!')
+            
+            # check for win condition
+            if level.player.done_level():
+                return
+
             # update clock
             old_time = self.time
             self.time += self.clock.tick(60)
@@ -113,7 +115,7 @@ class Roverchip:
             
             # handle events
             for event in pygame.event.get():
-                
+
                 # close window
                 if event.type == QUIT:
                     sys.exit()
@@ -121,7 +123,7 @@ class Roverchip:
                 # resize window
                 elif event.type == VIDEORESIZE:
                     self.init_window(event.size)
-                    self.draw_level(level)
+                    level.redraw = True
                     
                 # move controls
                 elif (event.type == KEYDOWN and event.key in self.move_keys):
@@ -134,37 +136,13 @@ class Roverchip:
                 elif event.type == KEYDOWN and event.key == K_RETURN:
                         return
                     
-            # execute frame for all sprites in layer order
+            # run hooks for all sprites in layer order
             for sprite in level.sprites.sprites():
                 sprite.start_turn()
             for sprite in level.sprites.sprites():
                 sprite.do_move(elapsed)
             for sprite in level.sprites.sprites():
                 sprite.end_turn()
-            
-            # get offset and draw background
-            left, top = self.find_offset(level)
-            self.view.blit(self.background, (0, 0), (left, top, self.width, self.height))
-
-            # update sprite positions, check for collisions, draw sprites
-            level.sprites.update(self.cellsize, (left, top), self.tileset)
-            for sprite in level.sprites.sprites():
-                sprite.check_collisions()
-                
-            # check for death
-            if not level.player.alive():
-                sys.exit('Ouch!')
-            if any(not rover.alive() for rover in level.get_sprites('Rover')):
-                sys.exit('Arf!')
-            
-            # check for win condition
-            if level.player.done_level():
-                return
-                
-            level.sprites.draw(self.view)
-
-            # update display
-            pygame.display.update()
 
 
 
