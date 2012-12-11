@@ -14,18 +14,33 @@ class Player(sprite.Sprite):
         self.rotate = True
         self.is_destructible = True
         
+        self.move_key = None
         self.following = pygame.sprite.Group()
         self.pushing = pygame.sprite.Group()
         self.inv = pygame.sprite.Group()
         
-
-    def try_move(self, move_dir):
+        
+    def move_key_down(self, move_key):
+        """When a movement key is pressed, start moving the player
+        if he isn't already."""
+        if self.move_key is None:
+            self.move_key = move_key
+        
+        
+    def move_key_up(self, move_key):
+        """When a movement key is released, stop moving the player
+        if he is moving in that direction."""
+        if move_key == self.move_key:
+            self.move_key = None
+        
+        
+    def start_turn(self):
         """Check if movement is possible in the given direction, and if so,
         initiate movement."""
-        if not self.to_move:
-            self.facing = move_dir
-            self.move_dir = move_dir
-            nextcell = self.level.get_neighbour(self.pos, move_dir)
+        if self.move_key is not None and not self.to_move:
+            self.facing = self.move_key
+            self.move_dir = self.move_key
+            nextcell = self.level.get_neighbour(self.pos, self.move_dir)
             # check if the square to move to exists and can be moved into
             if nextcell and self.level.player_can_enter(nextcell):
                 door = self.level.get_sprites_in(nextcell, False, 'Door')
@@ -39,7 +54,7 @@ class Player(sprite.Sprite):
                 # check if the square contains a movable object and if there is room to push it
                 movables = self.level.get_movables_in(nextcell)
                 if movables:
-                    nextcell2 = self.level.get_neighbour(nextcell, move_dir)
+                    nextcell2 = self.level.get_neighbour(nextcell, self.move_dir)
                     if (nextcell2 and self.level.object_can_enter(nextcell2)
                         and not self.level.get_solid_sprites_in(nextcell2, False)
                         and not self.level.get_enemies_in(nextcell2, False)

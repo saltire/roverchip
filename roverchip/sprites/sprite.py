@@ -110,7 +110,12 @@ class Sprite(pygame.sprite.Sprite):
         pass
     
     
+    def end_turn(self):
+        """A hook that is run after the movement phase of every turn."""
+        pass
+        
+
     def check_collisions(self):
-        """A hook run at the end of every turn, for collision-related actions."""
+        """A hook run after the end of every turn, for collision-related actions."""
         pass
     

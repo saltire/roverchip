@@ -16,7 +16,7 @@ class Laser(sprite.Sprite):
         self.beams = pygame.sprite.Group()
 
         
-    def start_turn(self):
+    def end_turn(self):
         """Render the laser beams every turn."""
         for beam in self.beams:
             beam.kill()

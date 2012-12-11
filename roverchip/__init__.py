@@ -7,6 +7,8 @@ import levelfile
 
 
 class Roverchip:
+    move_keys = K_UP, K_RIGHT, K_DOWN, K_LEFT
+        
     def __init__(self, levelpath, tilepath, tilesize):
         pygame.init()
         
@@ -101,8 +103,6 @@ class Roverchip:
         
     def loop(self, level):
         """The event loop for the running level."""
-        dirkeys = K_UP, K_RIGHT, K_DOWN, K_LEFT
-        
         self.draw_level(level)
         
         while True:
@@ -124,18 +124,23 @@ class Roverchip:
                     self.draw_level(level)
                     
                 # move controls
-                elif event.type == KEYDOWN:
-                    if event.key in dirkeys:
-                        level.player.try_move(dirkeys.index(event.key))
+                elif (event.type == KEYDOWN and event.key in self.move_keys):
+                    level.player.move_key_down(self.move_keys.index(event.key))
                         
-                    if event.key == K_RETURN:
+                elif (event.type == KEYUP and event.key in self.move_keys):
+                    level.player.move_key_up(self.move_keys.index(event.key))
+                
+                # skip level
+                elif event.type == KEYDOWN and event.key == K_RETURN:
                         return
-                            
-                            
+                    
             # execute frame for all sprites in layer order
             for sprite in level.sprites.sprites():
                 sprite.start_turn()
+            for sprite in level.sprites.sprites():
                 sprite.do_move(elapsed)
+            for sprite in level.sprites.sprites():
+                sprite.end_turn()
             
             # get offset and draw background
             left, top = self.find_offset(level)
