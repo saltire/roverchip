@@ -2,23 +2,21 @@ from collections import Counter
 import re
 
 import level
+from sprites import spritetypes
 
 
 class LevelFile:
-    cells = {'-': ('floor',),
-             '0': ('wall',),
-             'x': ('fire',),
-             'W': ('water',),
-             '^': ('water', 0), # n
-             '>': ('water', 1), # e
-             'v': ('water', 2), # s
-             '<': ('water', 3), # w
-             '=': ('grate',),
-             '*': ('exit',)
+    cells = {'-': ('Floor',),
+             '0': ('Wall',),
+             'x': ('Fire',),
+             'W': ('Water',),
+             '^': ('Water', 0), # n
+             '>': ('Water', 1), # e
+             'v': ('Water', 2), # s
+             '<': ('Water', 3), # w
+             '=': ('Grate',),
+             '*': ('Exit',)
              }
-    
-    sprites = ['ball', 'cart', 'chip', 'chipdoor', 'crate', 'dirt', 'door', 'key', 'laser', 'mirror',
-               'player', 'robot', 'rover', 'shooter', 'tank']
     
     
     def __init__(self, path):
@@ -67,13 +65,15 @@ class LevelFile:
                         if not match:
                             break
                         
-                        if match.group(1).lower() not in self.sprites:
+                        try:
+                            stype = next(stype for stype in spritetypes
+                                         if stype.lower() == match.group(1).lower())
+                        except StopIteration:
                             raise Exception('invalid sprite data at line {0}:\n{1}'
                                             .format(linenum, line))
                         
                         for sdata in match.group(2).split():
-                            spritedata.append((match.group(1),)
-                                              + tuple(int(x) for x in sdata.split(',')))
+                            spritedata.append((stype,) + tuple(int(x) for x in sdata.split(',')))
                         i += 1
                 
                 except IndexError:
@@ -82,13 +82,13 @@ class LevelFile:
                 # check for illegal counts of cells and sprites
                 ccount = Counter(cell[0] for cell in celldata.values())
                 scount = Counter(sprite[0] for sprite in spritedata)
-                if ccount['exit'] != 1:
+                if ccount['Exit'] != 1:
                     raise Exception('must be exactly 1 exit in level {0}'
                                     .format(len(levels) + 1))
-                if scount['player'] != 1:
+                if scount['Player'] != 1:
                     raise Exception('must be exactly 1 player in level {0}'
                                     .format(len(levels) + 1))
-                if scount['rover'] == 0 and scount['chip'] == 0:
+                if scount['Rover'] == 0 and scount['Chip'] == 0:
                     raise Exception('must be at least 1 rover or chip in level {0}'
                                     .format(len(levels) + 1))
                 

@@ -1,7 +1,7 @@
 import pygame
 
-import cells
-import sprites
+from cells import celltypes
+from sprites import spritetypes
 
 
 class Level:
@@ -11,25 +11,19 @@ class Level:
         
         # init map cells
         self.cells = {}
-        cellclasses = {}
-        
         for pos, cdata in celldata.items():
-            cls = cellclasses.setdefault(cdata[0], self._get_class(cells, cdata[0]))
-            self.cells[pos] = cls(self, pos, *cdata[1:])
+            self.cells[pos] = celltypes[cdata[0]](self, pos, *cdata[1:])
         
         self.width = len(set(x for x, _ in self.cells))
         self.height = len(set(y for _, y in self.cells))
         
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()
-        spriteclasses = {}
-        
         for sdata in spritedata:
-            cls = spriteclasses.setdefault(sdata[0], self._get_class(sprites, sdata[0]))
-            sprite = cls(self, sdata[1:3], *sdata[3:])
+            sprite = spritetypes[sdata[0]](self, sdata[1:3], *sdata[3:])
             self.sprites.add(sprite, layer=sprite.layer)
             
-            if sdata[0] == 'player':
+            if sdata[0] == 'Player':
                 self.player = sprite
                 
         # groups used for collisions
@@ -38,13 +32,6 @@ class Level:
         self.beams = pygame.sprite.Group()
         
         
-    def _get_class(self, package, name):
-        module = getattr(package, name.lower())
-        for cls in dir(module):
-            if cls.lower() == name.lower():
-                return getattr(module, cls)
-
-    
     # cell data
     
     def get_cell(self, pos):
@@ -54,7 +41,7 @@ class Level:
     
     def set_cell(self, pos, ctype, *opts):
         """Replace the cell at the given coords with a new one."""
-        self.cells[pos] = self._get_class(cells, ctype)(self, pos, *opts)
+        self.cells[pos] = celltypes[ctype](self, pos, *opts)
         self.redraw = True
     
     
