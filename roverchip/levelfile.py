@@ -6,16 +6,16 @@ from sprites import spritetypes
 
 
 class LevelFile:
-    cells = {'-': ('Floor',),
-             '0': ('Wall',),
-             'x': ('Fire',),
-             'W': ('Water',),
-             '^': ('Water', 0), # n
-             '>': ('Water', 1), # e
-             'v': ('Water', 2), # s
-             '<': ('Water', 3), # w
-             '=': ('Grate',),
-             '*': ('Exit',)
+    cells = {'--': ('Floor',),
+             '00': ('Wall',),
+             'xx': ('Fire',),
+             'WW': ('Water',),
+             'W^': ('Water', 0), # n
+             'W>': ('Water', 1), # e
+             'Wv': ('Water', 2), # s
+             'W<': ('Water', 3), # w
+             '==': ('Grate',),
+             '**': ('Exit',)
              }
     
     
@@ -48,9 +48,9 @@ class LevelFile:
                 if width is None:
                     width = len(line)
                     
-                if not all(ctype in self.cells for ctype in line):
+                if not all(ctype in self.cells for ctype in line.split()):
                     break
-                for x, ctype in enumerate(line):
+                for x, ctype in enumerate(line.split()):
                     celldata[x, i - starti - 1] = (self.cells[ctype][0], self.cells[ctype][1:])
                 i += 1
                 
