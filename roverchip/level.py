@@ -11,19 +11,19 @@ class Level:
         
         # init map cells
         self.cells = {}
-        for pos, cdata in celldata.items():
-            self.cells[pos] = celltypes[cdata[0]](self, pos, *cdata[1:])
+        for pos, (ctype, cdata) in celldata.items():
+            self.cells[pos] = celltypes[ctype](self, pos, *cdata)
         
         self.width = len(set(x for x, _ in self.cells))
         self.height = len(set(y for _, y in self.cells))
         
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()
-        for sdata in spritedata:
-            sprite = spritetypes[sdata[0]](self, sdata[1:3], *sdata[3:])
+        for stype, pos, sdata in spritedata:
+            sprite = spritetypes[stype](self, pos, *sdata)
             self.sprites.add(sprite, layer=sprite.layer)
-            
-            if sdata[0] == 'Player':
+
+            if stype == 'Player':
                 self.player = sprite
                 
         # groups used for collisions
