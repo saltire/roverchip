@@ -39,9 +39,9 @@ class Level:
         
         
     def _get_class(self, package, name):
-        module = getattr(package, name)
+        module = getattr(package, name.lower())
         for cls in dir(module):
-            if cls.lower() == name:
+            if cls.lower() == name.lower():
                 return getattr(module, cls)
 
     
@@ -54,7 +54,8 @@ class Level:
     
     def set_cell(self, pos, ctype, *opts):
         """Replace the cell at the given coords with a new one."""
-        self.cells[pos] = self._get_class(cells, ctype)(self, pos, *opts)
+        self.cells[pos] = self._get_class(cells, ctype)(self, *opts)
+        self.redraw = True
     
     
     def player_can_enter(self, pos):

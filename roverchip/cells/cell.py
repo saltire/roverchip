@@ -10,5 +10,11 @@ class Cell:
         
     
     def get_type(self):
+        """Return the type of the cell, i.e. the class name."""
         return self.__class__.__name__
+    
+
+    def player_inside(self, pos):
+        """A hook that runs after the player fully enters the cell."""
+        pass
     

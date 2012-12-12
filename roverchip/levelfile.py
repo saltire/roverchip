@@ -17,7 +17,7 @@ class LevelFile:
              '*': ('exit',)
              }
     
-    sprites = ['ball', 'cart', 'chip', 'chipdoor', 'crate', 'door', 'key', 'laser', 'mirror',
+    sprites = ['ball', 'cart', 'chip', 'chipdoor', 'crate', 'dirt', 'door', 'key', 'laser', 'mirror',
                'player', 'robot', 'rover', 'shooter', 'tank']
     
     
