@@ -2,8 +2,8 @@ import cell
 
 
 class Water(cell.Cell):
-    def __init__(self, level, flow_dir=None):
-        cell.Cell.__init__(self, level)
+    def __init__(self, level, pos, flow_dir=None):
+        cell.Cell.__init__(self, level, pos)
         
         self.tile = (3, 0) if flow_dir is None else (4, 0)
         self.rotate = 0 if flow_dir is None else flow_dir

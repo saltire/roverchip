@@ -1,6 +1,7 @@
 class Cell:
-    def __init__(self, level):
+    def __init__(self, level, pos):
         self.level = level
+        self.pos = pos
         
         self.tile = 0, 0                # tile coords in the tileset
         self.rotate = 0                 # rotation of the tile
@@ -14,7 +15,7 @@ class Cell:
         return self.__class__.__name__
     
 
-    def player_inside(self, pos):
+    def player_inside(self):
         """A hook that runs after the player fully enters the cell."""
         pass
     

@@ -100,7 +100,7 @@ class Player(sprite.Sprite):
     def after_move(self):
         """Run checks for items in the new square, and clean up movement actions."""
         # trigger player enter hook
-        self.level.get_cell(self.pos).player_inside(self.pos)
+        self.level.get_cell(self.pos).player_inside()
         
         # pick up items
         for item in self.level.get_items_in(self.pos):

@@ -2,8 +2,8 @@ import cell
 
 
 class Wall(cell.Cell):
-    def __init__(self, level):
-        cell.Cell.__init__(self, level)
+    def __init__(self, level, pos):
+        cell.Cell.__init__(self, level, pos)
         
         self.tile = 1, 0
         self.player_can_enter = False

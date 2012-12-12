@@ -15,7 +15,7 @@ class Level:
         
         for pos, cdata in celldata.items():
             cls = cellclasses.setdefault(cdata[0], self._get_class(cells, cdata[0]))
-            self.cells[pos] = cls(self, *cdata[1:])
+            self.cells[pos] = cls(self, pos, *cdata[1:])
         
         self.width = len(set(x for x, _ in self.cells))
         self.height = len(set(y for _, y in self.cells))
@@ -54,7 +54,7 @@ class Level:
     
     def set_cell(self, pos, ctype, *opts):
         """Replace the cell at the given coords with a new one."""
-        self.cells[pos] = self._get_class(cells, ctype)(self, *opts)
+        self.cells[pos] = self._get_class(cells, ctype)(self, pos, *opts)
         self.redraw = True
     
     
