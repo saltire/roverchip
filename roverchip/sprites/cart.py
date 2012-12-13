@@ -1,22 +1,12 @@
-import sprite
+from movable import Movable
 
 
-class Cart(sprite.Sprite):   
+class Cart(Movable):   
     def __init__(self, level, pos):
-        sprite.Sprite.__init__(self, level, pos)
+        Movable.__init__(self, level, pos)
         
         self.tile = 1, 1
-        self.layer = 1
         self.speed = 100
-        self.is_movable = True
-        self.is_solid = True
         
-    
-    def after_move(self):
-        # trigger object enter hook
-        self.level.get_cell(self.pos).object_inside()
-
-        # continue movement
-        nextcell = self.level.get_neighbour(self.pos, self.move_dir)
-        if self.level.object_can_enter(nextcell) and not self.level.get_solid_sprites_in(nextcell):
-            self.to_move = 1
+        self.is_sinkable = False
+        self.moves_continuously = True

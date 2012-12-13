@@ -1,11 +1,11 @@
 import pygame
 
-import sprite
+from sprite import Sprite
 
 
-class Laser(sprite.Sprite):
+class Laser(Sprite):
     def __init__(self, level, pos, facing):
-        sprite.Sprite.__init__(self, level, pos, facing)
+        Sprite.__init__(self, level, pos, facing)
         
         self.tile = 4, 1
         self.layer = 3
@@ -37,26 +37,27 @@ class Laser(sprite.Sprite):
         self.level.beams.add(self.beams)
         
         
-    def find_out_dir(self, cell, in_dir):
+    def find_out_dir(self, pos, in_dir):
         """When a laser beam enters a cell, find out which in direction it exits."""
-        if not self.level.object_can_enter(cell):
+        if not self.level.object_can_enter(pos):
             return None
         
-        mirror = self.level.get_sprites_in(cell, True, 'Mirror')
+        mirror = self.level.get_sprites_in(pos, True, 'Mirror')
         if mirror:
             return mirror[0].get_out_dir(in_dir)
         
-        for sprite in self.level.get_solid_sprites_in(cell, False):
-            if not sprite.is_destructible and sprite not in self.level.get_solid_sprites_in(self.level.get_neighbour(cell, in_dir), 1):
+        for sprite in self.level.get_solid_sprites_in(pos, False):
+            if (sprite not in self.level.get_solid_sprites_in(self.level.get_neighbour(pos, in_dir), 1)
+                and not sprite.is_destructible):
                 return None
         
         return in_dir
     
         
         
-class Laserbeam(sprite.Sprite):    
+class Laserbeam(Sprite):    
     def __init__(self, level, pos, dirs):
-        sprite.Sprite.__init__(self, level, pos)
+        Sprite.__init__(self, level, pos)
         
         self.layer = 2
         self.rotate = True

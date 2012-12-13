@@ -1,11 +1,11 @@
 import pygame
 
-import sprite
+from sprite import Sprite
 
 
-class Player(sprite.Sprite):   
+class Player(Sprite):   
     def __init__(self, level, pos, facing=0):
-        sprite.Sprite.__init__(self, level, pos, facing)
+        Sprite.__init__(self, level, pos, facing)
         
         self.tile = 0, 2
         self.facing = 2
@@ -102,13 +102,14 @@ class Player(sprite.Sprite):
         # trigger player enter hook
         self.level.get_cell(self.pos).player_inside()
         
-        # pick up items
+        # add items to inventory
         for item in self.level.get_items_in(self.pos):
-            if item.get_type() == 'Chip':
-                item.kill()
-                
-            elif not self.inv.has(item):
+            if not self.inv.has(item):
                 self.inv.add(item)
+                
+        # pick up chips
+        for chip in self.level.get_sprites_in(self.pos, True, 'Chip'):
+            chip.kill()
             
         # stop pushing objects
         self.pushing.empty()

@@ -1,13 +1,11 @@
-import sprite
+from item import Item
 
 
-class Key(sprite.Sprite):
+class Key(Item):
     def __init__(self, level, pos, colour):
-        sprite.Sprite.__init__(self, level, pos)
+        Item.__init__(self, level, pos)
         
         self.tile = 6, colour + 2
-        self.layer = 2
         self.size = 0.5
-        self.is_item = True
         
         self.colour = colour

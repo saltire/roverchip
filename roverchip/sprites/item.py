@@ -1,9 +1,9 @@
 from sprite import Sprite
 
 
-class Chip(Sprite):
+class Item(Sprite):
     def __init__(self, level, pos):
         Sprite.__init__(self, level, pos)
         
-        self.tile = 7, 2
-        
+        self.layer = 2
+        self.is_item = True

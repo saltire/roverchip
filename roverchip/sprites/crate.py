@@ -1,14 +1,12 @@
-import sprite
+from movable import Movable
+from sprite import Sprite
 
 
-class Crate(sprite.Sprite):   
+class Crate(Movable):   
     def __init__(self, level, pos):
-        sprite.Sprite.__init__(self, level, pos)
+        Movable.__init__(self, level, pos)
         
         self.tile = 2, 1
-        self.layer = 1
-        self.is_movable = True
-        self.is_solid = True
         
         
     def start_turn(self):
@@ -23,22 +21,11 @@ class Crate(sprite.Sprite):
             self.level.sprites.add(sunken)
             sunken.after_move()
 
-    
-    def after_move(self):
-        # trigger object enter hook
-        self.level.get_cell(self.pos).object_inside()
-
-        # continue moving over fire
-        nextcell = self.level.get_neighbour(self.pos, self.move_dir)
-        if (self.level.object_can_enter(nextcell)
-            and self.level.get_cell(self.pos).get_type() == 'Fire'):
-            self.to_move = 1
 
 
-
-class SunkenCrate(sprite.Sprite):
+class SunkenCrate(Sprite):
     def __init__(self, level, pos):
-        sprite.Sprite.__init__(self, level, pos)
+        Sprite.__init__(self, level, pos)
         self.tile = 3, 1
         self.speed = 250
         
