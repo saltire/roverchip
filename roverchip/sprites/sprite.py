@@ -22,11 +22,6 @@ class Sprite(pygame.sprite.Sprite):
         self.size = 1                   # size of sprite in cells
         self.speed = 250                # number of ms to move one cell
         self.rotate = False             # tile rotates according to self.facing
-        self.is_movable = False         # can be pushed by player
-        self.is_solid = False           # will stop things from entering its cell
-        self.is_enemy = False           # will kill player on entering his cell
-        self.is_item = False            # can be picked up by player
-        self.is_destructible = False    # will be destroyed by laserbeams
         
         
     def get_type(self):

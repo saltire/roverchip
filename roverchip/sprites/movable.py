@@ -5,9 +5,10 @@ class Movable(Sprite):
     def __init__(self, level, pos, facing=0):
         Sprite.__init__(self, level, pos, facing)
         
+        level.movables.add(self)
+        level.solids.add(self)
+        
         self.layer = 1
-        self.is_movable = True
-        self.is_solid = True
         
         self.is_sinkable = True
         self.moves_continuously = False
@@ -15,7 +16,7 @@ class Movable(Sprite):
         
     def start_turn(self):
         # if it's entirely on a water cell, destroy it
-        if (self.is_sinkable and len(self.cells_in()) == 1
+        if (len(self.cells_in()) == 1 and self.is_sinkable
             and self.level.get_cell(self.pos).get_type() == 'Water'
             and not self.level.get_sprites_in(self.pos, False, 'SunkenCrate')
             ):

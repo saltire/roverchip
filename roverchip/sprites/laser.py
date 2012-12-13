@@ -7,11 +7,12 @@ class Laser(Sprite):
     def __init__(self, level, pos, facing):
         Sprite.__init__(self, level, pos, facing)
         
+        level.destructibles.add(self)
+        level.solids.add(self)
+        
         self.tile = 4, 1
         self.layer = 3
         self.rotate = True
-        self.is_solid = True
-        self.is_destructible = True
         
         self.beams = pygame.sprite.Group()
 
@@ -46,9 +47,11 @@ class Laser(Sprite):
         if mirror:
             return mirror[0].get_out_dir(in_dir)
         
+        # stop beam if a solid object is in the cell, but not in the next one
+        # if it's in the next cell, the beam will stop there
         for sprite in self.level.get_solid_sprites_in(pos, False):
-            if (sprite not in self.level.get_solid_sprites_in(self.level.get_neighbour(pos, in_dir), 1)
-                and not sprite.is_destructible):
+            if (sprite not in self.level.get_solid_sprites_in(self.level.get_neighbour(pos, in_dir), True)
+                and not self.level.destructibles.has(sprite)):
                 return None
         
         return in_dir

@@ -7,12 +7,13 @@ class Player(Sprite):
     def __init__(self, level, pos, facing=0):
         Sprite.__init__(self, level, pos, facing)
         
+        level.destructibles.add(self)
+        
         self.tile = 0, 2
         self.facing = 2
         self.layer = 1
         self.speed = 250
         self.rotate = True
-        self.is_destructible = True
         
         self.move_key = None
         self.following = pygame.sprite.Group()

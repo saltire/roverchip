@@ -5,10 +5,11 @@ class Shooter(Sprite):
     def __init__(self, level, pos, facing):
         Sprite.__init__(self, level, pos, facing)
         
+        level.destructibles.add(self)
+        level.solids.add(self)
+        
         self.tile = 2, 2
         self.rotate = True
-        self.is_solid = True
-        self.is_destructible = True
         
     
     def check_collisions(self):

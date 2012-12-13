@@ -19,6 +19,14 @@ class Level:
         
         # init sprites and groups
         self.sprites = pygame.sprite.LayeredUpdates()
+        
+        self.destructibles = pygame.sprite.Group()  # will be destroyed by laserbeams
+        self.movables = pygame.sprite.Group()       # can be pushed by player
+        self.enemies = pygame.sprite.Group()        # will kill player on entering his cell
+        self.solids = pygame.sprite.Group()         # will stop things from entering its cell
+        self.items = pygame.sprite.Group()          # can be picked up by player
+        self.beams = pygame.sprite.Group()          # beams emitted by lasers
+        
         for stype, pos, sdata in spritedata:
             sprite = spritetypes[stype](self, pos, *sdata)
             self.sprites.add(sprite, layer=sprite.layer)
@@ -26,11 +34,6 @@ class Level:
             if stype == 'Player':
                 self.player = sprite
                 
-        # groups used for collisions
-        self.destructibles = pygame.sprite.Group(sprite for sprite in self.sprites if sprite.is_destructible)
-        self.enemies = pygame.sprite.Group(sprite for sprite in self.sprites if sprite.is_enemy)
-        self.beams = pygame.sprite.Group()
-        
         
     # cell data
     
@@ -107,23 +110,27 @@ class Level:
                 and (sprite.get_type() in types or not types)]
     
     
-    def get_solid_sprites_in(self, pos, inside=True):
-        """Return all solid sprites in a cell."""
-        return [sprite for sprite in self.get_sprites_in(pos, inside) if sprite.is_solid]
-    
-    
     def get_movables_in(self, pos, inside=True):
         """Return all movable object sprites in a cell."""
-        return [sprite for sprite in self.get_sprites_in(pos, inside) if sprite.is_movable]
+        return [sprite for sprite in self.get_sprites_in(pos, inside)
+                if self.movables.has(sprite)]
     
     
     def get_enemies_in(self, pos, inside=True):
         """Return all enemy sprites in a cell."""
-        return [sprite for sprite in self.get_sprites_in(pos, inside) if sprite.is_enemy]
+        return [sprite for sprite in self.get_sprites_in(pos, inside)
+                if self.enemies.has(sprite)]
+    
+    
+    def get_solid_sprites_in(self, pos, inside=True):
+        """Return all solid sprites in a cell."""
+        return [sprite for sprite in self.get_sprites_in(pos, inside)
+                if self.solids.has(sprite)]
     
     
     def get_items_in(self, pos, inside=True):
         """Remove all item sprites in a cell."""
-        return [sprite for sprite in self.get_sprites_in(pos, inside) if sprite.is_item]
+        return [sprite for sprite in self.get_sprites_in(pos, inside)
+                if self.items.has(sprite)]
     
     
