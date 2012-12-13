@@ -47,10 +47,12 @@ class Level:
     
     def player_can_enter(self, pos):
         """Return true if the player can enter the given cell."""
+        ctype = self.cells[pos].get_type()
         return pos in self.cells and (
             self.cells[pos].player_can_enter 
-            or (self.cells[pos].get_type() == 'Water'
-                and self.get_sprites_in(pos, False, 'SunkenCrate')))
+            or (ctype == 'Fire' and self.player.get_carried_items('Boots', 0))
+            or (ctype == 'Water' and (self.get_sprites_in(pos, False, 'SunkenCrate')
+                                      or self.player.get_carried_items('Boots', 1))))
     
     
     def robot_can_enter(self, pos):

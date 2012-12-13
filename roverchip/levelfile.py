@@ -15,7 +15,16 @@ class LevelFile:
              'Wv': ('Water', 2), # s
              'W<': ('Water', 3), # w
              '==': ('Grate',),
-             '**': ('Exit',)
+             '**': ('Exit',),
+             '//': ('Ice',),
+             '/^': ('Ice', 0),
+             '/>': ('Ice', 1),
+             '/v': ('Ice', 2),
+             '/<': ('Ice', 3),
+             'C^': ('Conveyor', 0),
+             'C>': ('Conveyor', 1),
+             'Cv': ('Conveyor', 2),
+             'C<': ('Conveyor', 3),
              }
     
     

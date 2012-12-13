@@ -14,12 +14,13 @@ class Sprite(pygame.sprite.Sprite):
         self.tile_facing = facing       # direction tile is facing
         self.to_move = 0                # tiles left to move
         self.move_dir = 0               # direction to move
+        self.new_cell = False           # true after moving to a new cell
         
         # defaults to override
         self.tile = 0, 0                # coords of sprite's tile in tileset
         self.layer = 0                  # layer the sprite is rendered on
         self.size = 1                   # size of sprite in cells
-        self.speed = 250               # number of ms to move one cell
+        self.speed = 250                # number of ms to move one cell
         self.rotate = False             # tile rotates according to self.facing
         self.is_movable = False         # can be pushed by player
         self.is_solid = False           # will stop things from entering its cell
@@ -62,7 +63,7 @@ class Sprite(pygame.sprite.Sprite):
             self.to_move -= max(abs(dx), abs(dy))
 
             if not self.to_move:
-                self.after_move()
+                self.new_cell = True
         
         
     def update(self, cellsize, offset, tileset):

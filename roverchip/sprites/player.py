@@ -78,7 +78,7 @@ class Player(sprite.Sprite):
                     
                     
     def start_move(self):
-        """Start the player moving one square in the facing direction."""
+        """Start the player moving one cell in the facing direction."""
         self.last_pos = self.pos
         self.to_move = 1
         
@@ -98,7 +98,7 @@ class Player(sprite.Sprite):
     
     
     def after_move(self):
-        """Run checks for items in the new square, and clean up movement actions."""
+        """Run checks for items in the new cell, and clean up movement actions."""
         # trigger player enter hook
         self.level.get_cell(self.pos).player_inside()
         
@@ -119,6 +119,14 @@ class Player(sprite.Sprite):
             if rover:
                 self.following.add(rover)
                 
+        # check for forced movement
+        cell = self.level.get_cell(self.pos)
+        if ((cell.get_type() == 'Ice' and not self.get_carried_items('Boots', 2))
+            or (cell.get_type() == 'Conveyor' and not self.get_carried_items('Boots', 3))):
+            self.move_dir = cell.get_out_dir(self.move_dir)
+            self.facing = self.move_dir
+            self.start_move()
+                
                     
     def done_level(self):
         """Check to see if the level has been completed."""
@@ -128,9 +136,11 @@ class Player(sprite.Sprite):
                 and not self.level.get_sprites('Chip'))
         
         
-    def get_carried_items(self, itype):
+    def get_carried_items(self, itype=None, colour=None):
         """Return all items that the player is carrying."""
-        return [item for item in self.inv if item.get_type() == itype]
+        return [item for item in self.inv
+                if (item.get_type() == itype or itype is None)
+                and (item.colour == colour or colour is None)]
             
             
     def check_collisions(self):

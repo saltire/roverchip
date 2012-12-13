@@ -142,6 +142,10 @@ class Roverchip:
             for sprite in level.sprites.sprites():
                 sprite.do_move(elapsed)
             for sprite in level.sprites.sprites():
+                if sprite.new_cell:
+                    sprite.after_move()
+                    sprite.new_cell = False
+            for sprite in level.sprites.sprites():
                 sprite.end_turn()
 
 
