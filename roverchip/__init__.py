@@ -58,22 +58,18 @@ class Roverchip:
 
     def loop(self, level):
         """The event loop for the running level."""
+        # generate level background
+        background = pygame.Surface((level.width * self.cellsize, level.height * self.cellsize))
+        for cx, cy in level.cells:
+            background.blit(level.get_cell((cx, cy)).draw(self.cellsize, self.tileset),
+                            (cx * self.cellsize, cy * self.cellsize))
+         
         while True:
-            # generate level background if redraw flag is on (it is initially)
-            if level.redraw:
-                background = pygame.Surface((level.width * self.cellsize, level.height * self.cellsize))
-                
-                tiles = {}
-                for cx, cy in level.cells:
-                    cell = level.get_cell((cx, cy))
-                    tx, ty = cell.tile
-                    tilerect = [i * self.cellsize for i in (tx, ty, 1, 1)]
-                    tileimg = tiles.setdefault(cell.tile, self.tileset.subsurface(tilerect))
-                    if cell.rotate != 0:
-                        tileimg = pygame.transform.rotate(tileimg, cell.rotate * -90)
-                    background.blit(tileimg, (cx * self.cellsize, cy * self.cellsize))
-                    
-                level.redraw = False
+            # check for tiles that need to be redrawn
+            for cx, cy in level.redraw_cells:
+                background.blit(level.get_cell((cx, cy)).draw(self.cellsize, self.tileset),
+                                (cx * self.cellsize, cy * self.cellsize))
+            level.redraw_cells.clear()
                     
             # find offset that places the player in the centre
             px, py = level.player.pos

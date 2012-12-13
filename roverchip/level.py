@@ -7,7 +7,7 @@ from sprites import spritetypes
 class Level:
     def __init__(self, celldata, spritedata):
         """Initialize all the cells and sprites, and add them to groups."""
-        self.redraw = True
+        self.redraw_cells = set()
         
         # init map cells
         self.cells = {}
@@ -42,7 +42,7 @@ class Level:
     def set_cell(self, pos, ctype, *opts):
         """Replace the cell at the given coords with a new one."""
         self.cells[pos] = celltypes[ctype](self, pos, *opts)
-        self.redraw = True
+        self.redraw_cells.add(pos)
     
     
     def player_can_enter(self, pos):

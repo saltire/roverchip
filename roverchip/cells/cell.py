@@ -1,3 +1,6 @@
+import pygame
+
+
 class Cell:
     def __init__(self, level, pos):
         self.level = level
@@ -13,6 +16,15 @@ class Cell:
     def get_type(self):
         """Return the type of the cell, i.e. the class name."""
         return self.__class__.__name__
+    
+    
+    def draw(self, cellsize, tileset):
+        """Draw the cell."""
+        tx, ty = self.tile
+        tileimg = tileset.subsurface((tx * cellsize, ty * cellsize, cellsize, cellsize))
+        if self.rotate != 0:
+            tileimg = pygame.transform.rotate(tileimg, self.rotate * -90)
+        return tileimg
     
 
     def player_inside(self):
