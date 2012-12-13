@@ -1,6 +1,6 @@
-import cell
+from cell import Cell
 
 
-class Floor(cell.Cell):
+class Floor(Cell):
     def __init__(self, level, pos):
-        cell.Cell.__init__(self, level, pos)
+        Cell.__init__(self, level, pos)

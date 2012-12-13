@@ -1,9 +1,9 @@
-import cell
+from cell import Cell
 
 
-class Toggle(cell.Cell):
+class Toggle(Cell):
     def __init__(self, level, pos, state):
-        cell.Cell.__init__(self, level, pos)
+        Cell.__init__(self, level, pos)
         
         self.tile = 11, 0
         self.player_can_enter = not state

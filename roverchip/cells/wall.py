@@ -1,9 +1,9 @@
-import cell
+from cell import Cell
 
 
-class Wall(cell.Cell):
+class Wall(Cell):
     def __init__(self, level, pos):
-        cell.Cell.__init__(self, level, pos)
+        Cell.__init__(self, level, pos)
         
         self.tile = 1, 0
         self.player_can_enter = False

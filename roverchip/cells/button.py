@@ -1,9 +1,9 @@
-import cell
+from cell import Cell
 
 
-class Button(cell.Cell):
+class Button(Cell):
     def __init__(self, level, pos, colour):
-        cell.Cell.__init__(self, level, pos)
+        Cell.__init__(self, level, pos)
         
         self.tile = 9, 2 + colour
         

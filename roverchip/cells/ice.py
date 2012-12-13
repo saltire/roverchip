@@ -1,11 +1,11 @@
 import pygame
 
-import cell
+from cell import Cell
 
 
-class Ice(cell.Cell):
+class Ice(Cell):
     def __init__(self, level, pos, facing=None):
-        cell.Cell.__init__(self, level, pos)
+        Cell.__init__(self, level, pos)
         
         self.tile = 9, 0
         self.facing = facing

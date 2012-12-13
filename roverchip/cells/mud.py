@@ -1,9 +1,9 @@
-import cell
+from cell import Cell
 
 
-class Mud(cell.Cell):
+class Mud(Cell):
     def __init__(self, level, pos):
-        cell.Cell.__init__(self, level, pos)
+        Cell.__init__(self, level, pos)
         
         self.tile = 8, 0
         self.robot_can_enter = False
