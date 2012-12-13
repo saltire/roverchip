@@ -1,7 +1,7 @@
 import sprite
 
 
-class Ball(sprite.Sprite):   
+class Ball(sprite.Sprite):
     def __init__(self, level, pos):
         sprite.Sprite.__init__(self, level, pos)
         
@@ -22,6 +22,10 @@ class Ball(sprite.Sprite):
         
     
     def after_move(self):
+        # trigger object enter hook
+        self.level.get_cell(self.pos).object_inside()
+
+        # continue movement
         nextcell = self.level.get_neighbour(self.pos, self.move_dir)
         if self.level.object_can_enter(nextcell) and not self.level.get_solid_sprites_in(nextcell):
             self.to_move = 1

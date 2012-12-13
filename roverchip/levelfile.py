@@ -25,6 +25,10 @@ class LevelFile:
              'C>': ('Conveyor', 1),
              'Cv': ('Conveyor', 2),
              'C<': ('Conveyor', 3),
+             '.%': ('Button', 0),
+             '%0': ('Toggle', 0),
+             '%1': ('Toggle', 1),
+             '.s': ('Button', 1),
              }
     
     

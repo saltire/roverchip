@@ -22,6 +22,9 @@ class Dirt(sprite.Sprite):
 
     
     def after_move(self):
+        # trigger object enter hook
+        self.level.get_cell(self.pos).object_inside()
+
+        # continue moving over fire
         if self.level.get_cell(self.pos).get_type() == 'Fire':
             self.to_move = 1
-

@@ -25,7 +25,13 @@ class Crate(sprite.Sprite):
 
     
     def after_move(self):
-        if self.level.get_cell(self.pos).get_type() == 'Fire':
+        # trigger object enter hook
+        self.level.get_cell(self.pos).object_inside()
+
+        # continue moving over fire
+        nextcell = self.level.get_neighbour(self.pos, self.move_dir)
+        if (self.level.object_can_enter(nextcell)
+            and self.level.get_cell(self.pos).get_type() == 'Fire'):
             self.to_move = 1
 
 

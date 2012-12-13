@@ -19,8 +19,11 @@ class Tank(sprite.Sprite):
         
     
     def start_turn(self):
+        # decide movement direction and start movement
         if not self.to_move:
             for t in range(4):
+                # starting from side set in self.follow,
+                # try each direction until it finds a cell it can enter
                 move_dir = (self.facing + ((1 - t) if self.follow else (t - 1))) % 4
                 nextcell = self.level.get_neighbour(self.pos, move_dir)
                 if (self.level.robot_can_enter(nextcell)
@@ -46,3 +49,8 @@ class Tank(sprite.Sprite):
 
             for sprite in self.level.get_sprites_in(cell, True, 'Player'):
                 sprite.kill()
+
+
+    def after_move(self):
+        # trigger enemy enter hook
+        self.level.get_cell(self.pos).enemy_inside()

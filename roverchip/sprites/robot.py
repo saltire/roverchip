@@ -17,6 +17,7 @@ class Robot(sprite.Sprite):
         
     
     def start_turn(self):
+        # decide movement direction and start movement
         if not self.to_move:
             for t in range(4):
                 # starting from side set in self.follow,
@@ -32,3 +33,7 @@ class Robot(sprite.Sprite):
                     self.to_move = 1
                     break
 
+
+    def after_move(self):
+        # trigger enemy enter hook
+        self.level.get_cell(self.pos).enemy_inside()

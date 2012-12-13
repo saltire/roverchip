@@ -13,7 +13,10 @@ class Cart(sprite.Sprite):
         
     
     def after_move(self):
-        nextcell = self.level.get_neighbour(self.pos, self.move_dir)
+        # trigger object enter hook
+        self.level.get_cell(self.pos).object_inside()
 
+        # continue movement
+        nextcell = self.level.get_neighbour(self.pos, self.move_dir)
         if self.level.object_can_enter(nextcell) and not self.level.get_solid_sprites_in(nextcell):
             self.to_move = 1

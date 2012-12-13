@@ -31,3 +31,12 @@ class Cell:
         """A hook that runs after the player fully enters the cell."""
         pass
     
+    
+    def enemy_inside(self):
+        """A hook that runs after an enemy fully enters the cell."""
+        pass
+
+
+    def object_inside(self):
+        """A hook that runs after an object fully enters the cell."""
+        pass

@@ -14,6 +14,15 @@ class Mirror(sprite.Sprite):
         self.out_dirs = facing, (facing + 1) % 4
         
         
+    def start_turn(self):
+        # if it's entirely on a water cell, destroy it
+        if (len(self.cells_in()) == 1
+            and self.level.get_cell(self.pos).get_type() == 'Water'
+            and not self.level.get_sprites_in(self.pos, False, 'SunkenCrate')
+            ):
+            self.kill()
+        
+    
     def get_out_dir(self, in_dir):
         # we want to know if the mirror is facing the opposite of in_dir
         # so let's reverse in_dir and see if it's one of the mirror's two dirs
@@ -23,10 +32,11 @@ class Mirror(sprite.Sprite):
     
     
     def after_move(self):
-        if self.level.get_cell(self.pos).get_type() == 'Fire':
-            self.to_move = 1
+        # trigger object enter hook
+        self.level.get_cell(self.pos).object_inside()
 
-        elif (self.level.get_cell(self.pos).get_type() == 'Water'
-              and not self.level.get_sprites_in(self.pos, False, 'SunkenCrate')):
-            self.kill()
-        
+        # continue moving over fire
+        nextcell = self.level.get_neighbour(self.pos, self.move_dir)
+        if (self.level.object_can_enter(nextcell)
+            and self.level.get_cell(self.pos).get_type() == 'Fire'):
+            self.to_move = 1

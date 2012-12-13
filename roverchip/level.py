@@ -43,8 +43,17 @@ class Level:
         """Replace the cell at the given coords with a new one."""
         self.cells[pos] = celltypes[ctype](self, pos, *opts)
         self.redraw_cells.add(pos)
+        
+        
+    def get_cells(self, *types):
+        """Return all cells, optionally filtering by a cell type."""
+        return [cell for cell in self.cells.values() if cell.get_type() in types or not types]
     
     
+    def trigger_redraw(self, pos):
+        self.redraw_cells.add(pos)
+            
+            
     def player_can_enter(self, pos):
         """Return true if the player can enter the given cell."""
         ctype = self.cells[pos].get_type()
