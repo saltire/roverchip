@@ -9,7 +9,7 @@ import tiledmap
 class Roverchip:
     move_keys = K_UP, K_RIGHT, K_DOWN, K_LEFT
         
-    def __init__(self, levelpath, tilepath, tilesize):
+    def __init__(self, levelpath='levels/*.tmx', tilepath='tiles.png', tilesize=16):
         pygame.init()
         
         # init clock
@@ -147,4 +147,4 @@ class Roverchip:
 
 
 if __name__ == '__main__':
-    Roverchip('levels', 'tiles.png', 16)
+    Roverchip()

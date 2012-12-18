@@ -1,4 +1,4 @@
-import os
+import glob
 import xml.etree.ElementTree as xml
 
 import level
@@ -50,18 +50,14 @@ class TiledMap:
              (4, 6): ('Tank', '', 2),
              }
 
-    def __init__(self, lpath):
-        """If passed a dir, read all .tmx files in that dir. If passed a file,
-        read that file."""
-        self.levels_xml = ([xml.parse(lpath)] if not os.path.isdir(lpath)
-                           else [xml.parse(os.path.join(lpath, lfile))
-                                 for lfile in os.listdir(lpath)
-                                 if lfile[-4:] == '.tmx'])
+    def __init__(self, pattern):
+        """Parse all Tiled XML files matching the given pattern."""
+        self.levels_xml = (xml.parse(lfile) for lfile in glob.glob(pattern))
         
         
     def get_levels(self):
-        """For each file passed, get the cell data from the first layer
-        and the sprite data from the second, and instantiate a level."""
+        """For each file passed, get cell data from the first layer
+        and sprite data from the rest, and instantiate a level."""
         
         def get_tile_data(layer, width, height):
             layerdata = layer.find('data').text.split(',')
@@ -82,11 +78,15 @@ class TiledMap:
             width = int(lxml.getroot().get('width'))
             height = int(lxml.getroot().get('height'))
             layers = lxml.findall('layer')
-                        
+            
+            # interpret bottom layer as tiles            
             celldata = get_tile_data(layers[0], width, height)
-                    
-            spritetiles = get_tile_data(layers[1], width, height)    
-            spritedata = [(pos, stype, sdata) for pos, (stype, sdata) in spritetiles.items()]
+            
+            # interpret all subsequent layers as sprites
+            spritedata = []
+            for layer in layers[1:]:
+                spritetiles = get_tile_data(layer, width, height)    
+                spritedata.extend((pos, stype, sdata) for pos, (stype, sdata) in spritetiles.items())
             
             levels.append(level.Level(celldata, spritedata))
 

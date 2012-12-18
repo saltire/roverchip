@@ -9,7 +9,7 @@ class Sentry(Enemy):
         
     
     def after_move(self):
-        Enemy.after_move()
+        Enemy.after_move(self)
 
         nextcell = self.level.get_neighbour(self.pos, self.move_dir)
         if self.level.object_can_enter(nextcell) and not self.level.get_solid_sprites_in(nextcell):
