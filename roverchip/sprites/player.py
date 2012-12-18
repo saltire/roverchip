@@ -43,13 +43,22 @@ class Player(Sprite):
             self.move_dir = self.move_key
             nextcell = self.level.get_neighbour(self.pos, self.move_dir)
             
+            # remove chipdoor if all chips have been collected
+            if (nextcell and self.level.get_cell(nextcell).get_type() == 'ChipDoor'
+                and not self.level.get_sprites('Chip')):
+                self.level.set_cell(nextcell, 'Floor')
+            
+            # open door if carrying the matching key
+            if nextcell and self.level.get_cell(nextcell).get_type() == 'Door':
+                key = [key for key in self.get_carried_items('Key')
+                       if key.colour == self.level.get_cell(nextcell).colour]
+                if key:
+                    self.level.set_cell(nextcell, 'Floor')
+                    if key[0].colour != 0:
+                        key[0].kill()
+            
             # check if the cell to move to exists and can be moved into
             if nextcell and self.level.player_can_enter(nextcell):
-                
-                # remove chipdoor if all chips have been collected
-                chipdoor = self.level.get_sprites_in(nextcell, False, 'ChipDoor')
-                if chipdoor and not self.level.get_sprites('Chip'):
-                    chipdoor[0].kill()
                 
                 # remove door if carrying the matching key
                 door = self.level.get_sprites_in(nextcell, False, 'Door')

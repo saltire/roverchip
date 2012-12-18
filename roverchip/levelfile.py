@@ -6,29 +6,19 @@ from sprites import spritetypes
 
 
 class LevelFile:
-    cells = {'--': ('Floor',),
-             '00': ('Wall',),
-             'xx': ('Fire',),
-             'WW': ('Water',),
-             'W^': ('Water', 0), # n
-             'W>': ('Water', 1), # e
-             'Wv': ('Water', 2), # s
-             'W<': ('Water', 3), # w
-             '==': ('Grate',),
-             '**': ('Exit',),
-             '//': ('Ice',),
-             '/^': ('Ice', 0),
-             '/>': ('Ice', 1),
-             '/v': ('Ice', 2),
-             '/<': ('Ice', 3),
-             'C^': ('Conveyor', 0),
-             'C>': ('Conveyor', 1),
-             'Cv': ('Conveyor', 2),
-             'C<': ('Conveyor', 3),
-             '.%': ('Button', 0),
-             '%0': ('Toggle', 0),
-             '%1': ('Toggle', 1),
-             '.s': ('Button', 1),
+    cells = {'-': ('Floor',),
+             '0': ('Wall',),
+             'x': ('Fire',),
+             'W': ('Water', {'W': (None,), '^': (0,), '>': (1,), 'v': (2,), '<': (3,)}),
+             '=': ('Grate',),
+             '*': ('Exit',),
+             '/': ('Ice', {'/': (None,), '^': (0,), '>': (1,), 'V': (2,), '<': (3,)}),
+             'C': ('Conveyor', {'^': (0,), '>': (1,), 'v': (2,), '<': (3,)}),
+             '.': ('Button', {'%': (0,), 'S': (1,), 'T': (2,)}),
+             '%': ('Toggle', {'0': (0,), '1': (1,)}),
+             '[': ('Door', {'0': (1, 0), '1': (1, 1), '2': (1, 2), '3': (1, 3)}),
+             ']': ('Door', {'0': (2, 0), '1': (2, 1), '2': (2, 2), '3': (2, 3)}),
+             '{': ('ChipDoor', {'-': (0,), '|': (1,)})
              }
     
     
@@ -61,10 +51,11 @@ class LevelFile:
                 if width is None:
                     width = len(line)
                     
-                if not all(ctype in self.cells for ctype in line.split()):
+                if not all(len(cell) == 2 and cell[0] in self.cells for cell in line.split()):
                     break
-                for x, ctype in enumerate(line.split()):
-                    celldata[x, i - starti - 1] = (self.cells[ctype][0], self.cells[ctype][1:])
+                for x, (ctype, opt) in enumerate(line.split()):
+                    cdata = tuple(self.cells[ctype][1][opt]) if len(self.cells[ctype]) > 1 else ()
+                    celldata[x, i - starti - 1] = (self.cells[ctype][0], cdata)
                 i += 1
                 
             # check cell requirements
