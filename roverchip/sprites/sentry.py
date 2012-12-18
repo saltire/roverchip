@@ -5,7 +5,7 @@ class Sentry(Enemy):
     def __init__(self, level, pos, facing=0):
         Enemy.__init__(self, level, pos, facing)
         
-        self.tile = 3, 2
+        self.tile = 3, 3
         
     
     def after_move(self):

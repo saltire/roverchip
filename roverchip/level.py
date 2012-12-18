@@ -27,7 +27,7 @@ class Level:
         self.items = pygame.sprite.Group()          # can be picked up by player
         self.beams = pygame.sprite.Group()          # beams emitted by lasers
         
-        for stype, pos, sdata in spritedata:
+        for pos, stype, sdata in spritedata:
             sprite = spritetypes[stype](self, pos, *sdata)
             self.sprites.add(sprite, layer=sprite.layer)
 

@@ -3,7 +3,7 @@ import sys
 import pygame
 from pygame.locals import *
 
-import levelfile
+import tiledmap
 
 
 class Roverchip:
@@ -30,7 +30,7 @@ class Roverchip:
         self.init_window((vw * cellsize, vh * cellsize))
         
         # start loop
-        for level in levelfile.LevelFile(levelpath).get_levels():
+        for level in tiledmap.TiledMap(levelpath).get_levels():
             self.loop(level)
             
         sys.exit('Yay!')
@@ -147,4 +147,4 @@ class Roverchip:
 
 
 if __name__ == '__main__':
-    Roverchip('chips.txt', 'tiles.png', 16)
+    Roverchip('levels', 'tiles.png', 16)
