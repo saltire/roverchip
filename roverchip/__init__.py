@@ -3,12 +3,12 @@ import sys
 import pygame
 from pygame.locals import *
 
-from game import Game
+import game
 import tiledmap
 
 
 class Roverchip:
-    def __init__(self, levelpath='levels/*.tmx', tilepath='tiles.png', tilesize=16):
+    def __init__(self, levelpath='levels/*.tmx'):
         pygame.init()
         
         # init clock
@@ -23,43 +23,41 @@ class Roverchip:
         self.init_window(self.dims)
         
         # run levels
-        for level in tiledmap.TiledMap(levelpath).get_levels():
-            game = Game(level, tilepath, tilesize)
+        screen = game.Game(tiledmap.TiledMap(levelpath).get_levels())
             
-            # run frame loop
-            while True:
-                # update clock
-                old_time = self.time
-                self.time += self.clock.tick(60)
-                elapsed = float(self.time - old_time)
-                
-                # get keypresses
-                keys = []
-                for event in pygame.event.get():
-                    # close window
-                    if event.type == QUIT:
-                        sys.exit()
-                        
-                    # resize window
-                    elif event.type == VIDEORESIZE:
-                        self.init_window(event.size)
-                        level.redraw = True
-                        
-                    elif event.type == KEYDOWN:
-                        keys.append((event.key, 1))
-                        
-                    elif event.type == KEYUP:
-                        keys.append((event.key, 0))
-                
-                # run a frame of the game
-                status = game.run_frame(elapsed, keys)
-                
-                if status[0] == 'win':
-                    break
-                
-                if status[0] == 'dead':
-                    sys.exit(('Ouch!', 'Arf!')[status[1]])
-                
+        # run frame loop
+        while True:
+            # update clock
+            old_time = self.time
+            self.time += self.clock.tick(60)
+            elapsed = float(self.time - old_time)
+            
+            # get keypresses
+            keys = []
+            for event in pygame.event.get():
+                # close window
+                if event.type == QUIT:
+                    sys.exit()
+                    
+                # resize window
+                elif event.type == VIDEORESIZE:
+                    self.init_window(event.size)
+                    
+                elif event.type == KEYDOWN:
+                    keys.append((event.key, 1))
+                    
+                elif event.type == KEYUP:
+                    keys.append((event.key, 0))
+            
+            # run a frame of the game
+            status = screen.run_frame(elapsed, keys)
+            
+            if status[0] == 'win':
+                break
+            
+            if status[0] == 'dead':
+                sys.exit(('Ouch!', 'Arf!')[status[1]])
+            
         sys.exit('Yay!')
         
         

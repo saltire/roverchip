@@ -5,31 +5,39 @@ from pygame.locals import *
 class Game:
     move_keys = K_UP, K_RIGHT, K_DOWN, K_LEFT
         
-    def __init__(self, level, tilepath, tilesize):
-        self.level = level
+    def __init__(self, levels, lskip=0, tilepath='tiles.png', tilesize=16):
+        # init levels
+        self.levels = (level for level in levels[lskip:])
+        self.level = next(self.levels)
         
         # init sprite tileset
         self.tileimg = pygame.image.load(tilepath)
         self.tiledims = self.tileimg.get_width() / tilesize, self.tileimg.get_height() / tilesize
         
         # init view
-        self.viewsize = 10, 6
-        self.set_viewsize(pygame.display.get_surface().get_size())
+        self.viewcells = 10, 6
+        self.windowsize = None
+        self._set_viewsize()
         
         # draw the initial frame
-        self.draw_frame()
-            
-            
-    def set_viewsize(self, (ww, wh)):
-        """Set the cell size, and thus the view size, so that the view
-        fits within the window."""
-        # init screen of proper size within the window
+        self._draw_frame()
+        
+        
+    def _set_viewsize(self):
+        """If window size has changed, set the cell size and reinitialize
+        the view so that it fits within the window."""
+        # check if the window size has changed
+        ww, wh = pygame.display.get_surface().get_size()
+        if self.windowsize == (ww, wh):
+            return
         self.windowsize = ww, wh
-        vw, vh = self.viewsize
-        self.cellsize = min(ww / vw, wh / vh)
-        self.width, self.height = vw * self.cellsize, vh * self.cellsize
-        self.left, self.top = int((ww - self.width) / 2), int((wh - self.height) / 2)
-        self.view = pygame.display.get_surface().subsurface((self.left, self.top, self.width, self.height))
+        
+        # init view of proper size within the window
+        vw, vh = self.viewcells
+        self.cellsize = min(ww / vw, wh / vh)        
+        width, height = vw * self.cellsize, vh * self.cellsize
+        left, top = int((ww - width) / 2), int((wh - height) / 2)
+        self.view = pygame.display.get_surface().subsurface((left, top, width, height))
 
         # init tileset
         tilew, tileh = self.tiledims
@@ -41,7 +49,7 @@ class Game:
         
     def run_frame(self, elapsed, keys):
         """Run a single frame for this level."""
-        status = 'ok',
+        self.status = 'ok',
         
         # check collisions
         for sprite in self.level.sprites:
@@ -49,13 +57,13 @@ class Game:
 
         # check for death
         if not self.level.player.alive():
-            status = 'dead', 0
+            self.status = 'dead', 0
         if any(not rover.alive() for rover in self.level.get_sprites('Rover')):
-            status = 'dead', 1
+            self.status = 'dead', 1
         
         # check for win condition
         if self.level.player.done_level():
-            status = 'win',
+            self.status = self._advance_level()
 
         # handle events
         for key, keydown in keys:
@@ -69,7 +77,7 @@ class Game:
             
             # skip level
             elif keydown and key == K_RETURN:
-                status = 'win',
+                self.status = self._advance_level()
                 
         # run hooks for all sprites in layer order
         for sprite in self.level.sprites:
@@ -87,17 +95,25 @@ class Game:
             sprite.end_turn()
             
         # draw the frame again
-        self.draw_frame()
+        self._draw_frame()
         
-        return status
+        return self.status
 
 
-    def draw_frame(self):
+    def _advance_level(self):
+        """Get the next level, or return False if there is no next level."""
+        try:
+            self.level = next(self.levels)
+            return self.status
+        
+        except StopIteration:
+            return 'win',
+        
+        
+    def _draw_frame(self):
         """Draw a frame at the current state of the level."""
         # check for window resize
-        windowsize = pygame.display.get_surface().get_size()
-        if self.windowsize != windowsize:
-            self.set_viewsize(windowsize)
+        self._set_viewsize()
         
         # redraw cells
         if self.level.redraw:
@@ -116,7 +132,7 @@ class Game:
                 
         # find offset that places the player in the centre
         px, py = self.level.player.pos
-        vw, vh = self.viewsize
+        vw, vh = self.viewcells
         ox = px - (vw - 1) / 2.0
         oy = py - (vh - 1) / 2.0
         
@@ -126,7 +142,8 @@ class Game:
 
         # blit background onto the view
         left, top = int(ox * self.cellsize), int(oy * self.cellsize)
-        self.view.blit(self.background, (0, 0), (left, top, self.width, self.height))
+        width, height = self.view.get_size()
+        self.view.blit(self.background, (0, 0), (left, top, width, height))
 
         # update sprite positions, draw sprites, update display
         self.level.sprites.update(self.cellsize, (left, top), self.tileset)
