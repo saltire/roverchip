@@ -1,11 +1,17 @@
 import pygame
 from pygame.locals import *
 
+from screen import Screen
 
-class Game:
+
+class Game(Screen):
     move_keys = K_UP, K_RIGHT, K_DOWN, K_LEFT
         
     def __init__(self, levels, lskip=0, tilepath='tiles.png', tilesize=16):
+        Screen.__init__(self)
+        
+        self.viewcells = 10, 6  # size of the view in cells
+        
         # init levels
         self.levels = (level for level in levels[lskip:])
         self.level = next(self.levels)
@@ -14,30 +20,14 @@ class Game:
         self.tileimg = pygame.image.load(tilepath)
         self.tiledims = self.tileimg.get_width() / tilesize, self.tileimg.get_height() / tilesize
         
-        # init view
-        self.viewcells = 10, 6
-        self.windowsize = None
-        self._set_viewsize()
-        
         # draw the initial frame
         self._draw_frame()
         
         
-    def _set_viewsize(self):
-        """If window size has changed, set the cell size and reinitialize
-        the view so that it fits within the window."""
-        # check if the window size has changed
-        ww, wh = pygame.display.get_surface().get_size()
-        if self.windowsize == (ww, wh):
+    def _init_view(self):
+        """Init view, and also resize the tileset and set the level to redraw."""
+        if Screen._init_view(self) is False:
             return
-        self.windowsize = ww, wh
-        
-        # init view of proper size within the window
-        vw, vh = self.viewcells
-        self.cellsize = min(ww / vw, wh / vh)        
-        width, height = vw * self.cellsize, vh * self.cellsize
-        left, top = int((ww - width) / 2), int((wh - height) / 2)
-        self.view = pygame.display.get_surface().subsurface((left, top, width, height))
 
         # init tileset
         tilew, tileh = self.tiledims
@@ -45,6 +35,19 @@ class Game:
                                               (tilew * self.cellsize, tileh * self.cellsize))
         
         self.level.redraw = True
+        
+        
+    def _get_view_rect(self):
+        """Set the cell size to create the largest possible rectangle with
+        the same ratio as viewcells."""
+        # init view of proper size within the window
+        ww, wh = self.windowsize
+        vw, vh = self.viewcells
+        self.cellsize = min(ww / vw, wh / vh)        
+        width, height = vw * self.cellsize, vh * self.cellsize
+        left, top = int((ww - width) / 2), int((wh - height) / 2)
+        
+        return left, top, width, height
         
         
     def run_frame(self, elapsed, keys):
@@ -113,7 +116,7 @@ class Game:
     def _draw_frame(self):
         """Draw a frame at the current state of the level."""
         # check for window resize
-        self._set_viewsize()
+        self._init_view()
         
         # redraw cells
         if self.level.redraw:
@@ -148,7 +151,6 @@ class Game:
         # update sprite positions, draw sprites, update display
         self.level.sprites.update(self.cellsize, (left, top), self.tileset)
         self.level.sprites.draw(self.view)
-        pygame.display.update()
         
         
 

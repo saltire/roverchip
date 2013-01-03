@@ -3,7 +3,8 @@ import sys
 import pygame
 from pygame.locals import *
 
-import game
+from screens import game
+from screens import menu
 import tiledmap
 
 
@@ -24,6 +25,7 @@ class Roverchip:
         
         # run levels
         screen = game.Game(tiledmap.TiledMap(levelpath).get_levels())
+        #screen = menu.Menu()
             
         # run frame loop
         while True:
@@ -51,6 +53,7 @@ class Roverchip:
             
             # run a frame of the game
             status = screen.run_frame(elapsed, keys)
+            pygame.display.update()
             
             if status[0] == 'win':
                 break
