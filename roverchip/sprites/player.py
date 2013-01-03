@@ -99,7 +99,7 @@ class Player(Sprite):
             item.to_move = 1
             
         # move rover
-        for follower in self.following.sprites():
+        for follower in self.following:
             move_dir = self.level.get_dir(follower.pos, self.pos)
             follower.facing = move_dir
             follower.move_dir = move_dir
