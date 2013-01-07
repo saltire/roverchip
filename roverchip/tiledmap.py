@@ -1,8 +1,6 @@
 import glob
 import xml.etree.ElementTree as xml
 
-import level
-
 
 class TiledMap:
     tiles = {(0, 0): ('Floor',),
@@ -88,7 +86,7 @@ class TiledMap:
                 spritetiles = get_tile_data(layer, width, height)    
                 spritedata.extend((pos, stype, sdata) for pos, (stype, sdata) in spritetiles.items())
             
-            levels.append(level.Level(celldata, spritedata))
+            levels.append((celldata, spritedata))
 
         return levels
         

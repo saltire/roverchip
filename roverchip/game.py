@@ -1,24 +1,27 @@
+import os
+
 import pygame
 
+from level import Level
 from screen import Screen
 
 
 class Game(Screen):
     move_keys = pygame.K_UP, pygame.K_RIGHT, pygame.K_DOWN, pygame.K_LEFT
         
-    def __init__(self, levels, lskip=0, tilepath='tiles.png', tilesize=16):
-        
+    def __init__(self, window, leveldata, lskip=0, tilepath='tiles.png', tilesize=16):
         self.viewcells = 10, 6  # size of the view in cells
         
         # init levels
-        self.levels = (level for level in levels[lskip:])
-        self.level = next(self.levels)
+        self.leveldata = leveldata
+        self.current_level = lskip
+        self.level = Level(*self.leveldata[self.current_level])
         
         # init sprite tileset
-        self.tileimg = pygame.image.load(tilepath)
+        self.tileimg = pygame.image.load(os.path.join(window.path, tilepath))
         self.tiledims = self.tileimg.get_width() / tilesize, self.tileimg.get_height() / tilesize
         
-        Screen.__init__(self)
+        Screen.__init__(self, window)
         
         
     def find_view_rect(self):
@@ -36,25 +39,22 @@ class Game(Screen):
         
     def run_frame(self, elapsed, keys):
         """Run a single frame for this level."""
-        self.status = 'ok',
-        
         # check collisions
         for sprite in self.level.sprites:
             sprite.check_collisions()
 
-        # check for death
-        if not self.level.player.alive():
-            self.status = 'dead', 0
-        if any(not rover.alive() for rover in self.level.get_sprites('Rover')):
-            self.status = 'dead', 1
+        # check for death -> reset level
+        if (not self.level.player.alive()
+            or any(not rover.alive() for rover in self.level.get_sprites('Rover'))):
+            self.level = Level(*self.leveldata[self.current_level])
         
-        # check for win condition
+        # check for win condition -> advance level, or quit if last level
         if self.level.player.done_level():
-            self.status = self._advance_level()
+            if self._advance_level() is False:
+                return 'quit'
 
         # handle events
         for key, keydown in keys:
-            
             # move controls
             if keydown and key in self.move_keys:
                 self.level.player.move_key_down(self.move_keys.index(key))
@@ -62,9 +62,10 @@ class Game(Screen):
             elif not keydown and key in self.move_keys:
                 self.level.player.move_key_up(self.move_keys.index(key))
             
-            # skip level
+            # skip level, or quit if last level
             elif keydown and key == pygame.K_RETURN:
-                self.status = self._advance_level()
+                if self._advance_level() is False:
+                    return 'quit'
                 
         # run hooks for all sprites in layer order
         for sprite in self.level.sprites:
@@ -83,18 +84,16 @@ class Game(Screen):
             
         # draw the frame again
         self.draw_frame()
-        
-        return self.status
 
 
     def _advance_level(self):
         """Get the next level, or return False if there is no next level."""
         try:
-            self.level = next(self.levels)
-            return self.status
-        
-        except StopIteration:
-            return 'win',
+            self.current_level += 1
+            self.level = Level(*self.leveldata[self.current_level])
+            
+        except IndexError:
+            return False
         
         
     def draw_frame(self):

@@ -1,74 +1,35 @@
-import sys
+import os
 
 import pygame
 
-from screens import game
-from screens import menu
-import tiledmap
+from menu import Menu
+from tiledmap import TiledMap
 
 
 class Roverchip:
-    def __init__(self, levelpath='levels/*.tmx'):
+    def __init__(self, levelpath='levels/*.tmx', size=(800, 480)):
+        # init pygame variables
         pygame.init()
+        self.init_window(size)
+        pygame.key.set_repeat(1, 100)
         
-        # init clock
+        # init properties
+        self.view = pygame.display.get_surface()
         self.clock = pygame.time.Clock()
-        self.time = self.clock.tick()
+        self.path = os.path.dirname(__file__)
 
-        # init keyboard settings
-        pygame.key.set_repeat(1, 50)
+        # init levels
+        levels = TiledMap(os.path.join(self.path, levelpath)).get_levels()
 
-        # init window
-        self.dims = (800, 480)
-        self.init_window(self.dims)
-        
-        # init screen
-        screen = menu.Menu()
-        #screen = game.Game(tiledmap.TiledMap(levelpath).get_levels())
-            
-        # run frame loop
-        while True:
-            # update clock
-            old_time = self.time
-            self.time += self.clock.tick(60)
-            elapsed = float(self.time - old_time)
-            
-            # get keypresses
-            keys = []
-            for event in pygame.event.get():
-                # close window
-                if event.type == pygame.QUIT:
-                    sys.exit()
-                    
-                # resize window
-                elif event.type == pygame.VIDEORESIZE:
-                    self.init_window(event.size)
-                    
-                elif event.type == pygame.KEYDOWN:
-                    keys.append((event.key, 1))
-                    
-                elif event.type == pygame.KEYUP:
-                    keys.append((event.key, 0))
-            
-            # run a frame of the game
-            status = screen.run_frame(elapsed, keys)
-            pygame.display.update()
-            
-            if status[0] == 'win':
-                break
-            
-            if status[0] == 'dead':
-                sys.exit(('Ouch!', 'Arf!')[status[1]])
-            
-        sys.exit('Yay!')
-        
-        
+        # run the menu screen
+        Menu(self, levels).run()
+    
+    
     def init_window(self, (width, height)):
         """Initialize the game window. Called at beginning, and every time
         the window is resized."""
         pygame.display.set_mode((width, height), pygame.RESIZABLE).fill((0, 0, 0))
         
-
 
 if __name__ == '__main__':
     Roverchip()

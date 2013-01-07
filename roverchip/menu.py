@@ -1,24 +1,31 @@
 import pygame
 
+from game import Game
 from screen import Screen
 
 
 class Menu(Screen):
-    def __init__(self):
+    def __init__(self, clock, levels):
+        # init subwindow
         self.basesize = 3, 2
         self.maxsize = .9, .9
         
+        # init menu options
         self.fontheight = 50
         self.options = [('play', 'Play Game'),
                         ('quit', 'Quit Game'),
                         ]
 
+        # init marker
         self.selected = 0
         self.marker = pygame.surface.Surface((20, 20))
         self.marker.fill((255, 0, 0))
         self.arrow_timeout = 0
+        
+        # init levels
+        self.levels = levels
 
-        Screen.__init__(self)
+        Screen.__init__(self, clock)
         
         
     def find_view_rect(self):
@@ -35,8 +42,6 @@ class Menu(Screen):
 
 
     def run_frame(self, elapsed, keys):
-        status = 'ok',
-        
         if self.arrow_timeout > 0:
             self.arrow_timeout -= elapsed
         
@@ -51,18 +56,20 @@ class Menu(Screen):
                 
             # return selection on hitting enter
             elif keydown and key == pygame.K_RETURN:
-                status = self.options[self.selected][0],
-        
-        # draw the frame again
-        self.draw_frame()
-        
-        return status
-    
+                action = self.options[self.selected][0]
+                
+                if action == 'play':
+                    Game(self.window, self.levels).run()
+                    self.redraw = True
+                    
+                elif action == 'quit':
+                    return 'quit'
+            
     
     def draw_frame(self):
         if self.resize_view():
             # redraw the background and render the text
-            self.background = pygame.surface.Surface(self.view.get_size())
+            self.background = pygame.Surface(self.view.get_size())
             self.background.fill((255, 255, 255))
     
             left, top = 50, 50
