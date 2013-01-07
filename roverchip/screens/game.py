@@ -1,14 +1,12 @@
 import pygame
-from pygame.locals import *
 
 from screen import Screen
 
 
 class Game(Screen):
-    move_keys = K_UP, K_RIGHT, K_DOWN, K_LEFT
+    move_keys = pygame.K_UP, pygame.K_RIGHT, pygame.K_DOWN, pygame.K_LEFT
         
     def __init__(self, levels, lskip=0, tilepath='tiles.png', tilesize=16):
-        Screen.__init__(self)
         
         self.viewcells = 10, 6  # size of the view in cells
         
@@ -20,24 +18,10 @@ class Game(Screen):
         self.tileimg = pygame.image.load(tilepath)
         self.tiledims = self.tileimg.get_width() / tilesize, self.tileimg.get_height() / tilesize
         
-        # draw the initial frame
-        self._draw_frame()
+        Screen.__init__(self)
         
         
-    def _init_view(self):
-        """Init view, and also resize the tileset and set the level to redraw."""
-        if Screen._init_view(self) is False:
-            return
-
-        # init tileset
-        tilew, tileh = self.tiledims
-        self.tileset = pygame.transform.scale(self.tileimg.convert_alpha(),
-                                              (tilew * self.cellsize, tileh * self.cellsize))
-        
-        self.level.redraw = True
-        
-        
-    def _get_view_rect(self):
+    def find_view_rect(self):
         """Set the cell size to create the largest possible rectangle with
         the same ratio as viewcells."""
         # init view of proper size within the window
@@ -79,7 +63,7 @@ class Game(Screen):
                 self.level.player.move_key_up(self.move_keys.index(key))
             
             # skip level
-            elif keydown and key == K_RETURN:
+            elif keydown and key == pygame.K_RETURN:
                 self.status = self._advance_level()
                 
         # run hooks for all sprites in layer order
@@ -98,7 +82,7 @@ class Game(Screen):
             sprite.end_turn()
             
         # draw the frame again
-        self._draw_frame()
+        self.draw_frame()
         
         return self.status
 
@@ -113,11 +97,16 @@ class Game(Screen):
             return 'win',
         
         
-    def _draw_frame(self):
+    def draw_frame(self):
         """Draw a frame at the current state of the level."""
         # check for window resize
-        self._init_view()
-        
+        if self.resize_view():
+            # init tileset
+            tilew, tileh = self.tiledims
+            self.tileset = pygame.transform.scale(self.tileimg.convert_alpha(),
+                                                  (tilew * self.cellsize, tileh * self.cellsize))
+            self.level.redraw = True
+
         # redraw cells
         if self.level.redraw:
             # draw entire level background

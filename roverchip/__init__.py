@@ -1,7 +1,6 @@
 import sys
 
 import pygame
-from pygame.locals import *
 
 from screens import game
 from screens import menu
@@ -23,9 +22,9 @@ class Roverchip:
         self.dims = (800, 480)
         self.init_window(self.dims)
         
-        # run levels
-        screen = game.Game(tiledmap.TiledMap(levelpath).get_levels())
-        #screen = menu.Menu()
+        # init screen
+        screen = menu.Menu()
+        #screen = game.Game(tiledmap.TiledMap(levelpath).get_levels())
             
         # run frame loop
         while True:
@@ -38,17 +37,17 @@ class Roverchip:
             keys = []
             for event in pygame.event.get():
                 # close window
-                if event.type == QUIT:
+                if event.type == pygame.QUIT:
                     sys.exit()
                     
                 # resize window
-                elif event.type == VIDEORESIZE:
+                elif event.type == pygame.VIDEORESIZE:
                     self.init_window(event.size)
                     
-                elif event.type == KEYDOWN:
+                elif event.type == pygame.KEYDOWN:
                     keys.append((event.key, 1))
                     
-                elif event.type == KEYUP:
+                elif event.type == pygame.KEYUP:
                     keys.append((event.key, 0))
             
             # run a frame of the game
@@ -67,7 +66,7 @@ class Roverchip:
     def init_window(self, (width, height)):
         """Initialize the game window. Called at beginning, and every time
         the window is resized."""
-        pygame.display.set_mode((width, height), RESIZABLE).fill((0, 0, 0))
+        pygame.display.set_mode((width, height), pygame.RESIZABLE).fill((0, 0, 0))
         
 
 
