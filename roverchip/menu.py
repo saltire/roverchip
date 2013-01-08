@@ -12,9 +12,10 @@ class Menu(Screen):
         
         # init menu options
         self.fontheight = 50
-        self.options = [('play', 'Play Game'),
+        self.mainmenu = [('play', 'Play Game'),
                         ('quit', 'Quit Game'),
                         ]
+        self.options = self.mainmenu
 
         # init marker
         self.selected = 0
@@ -24,14 +25,14 @@ class Menu(Screen):
         
         # init levels
         self.levels = levels
-
+        
         Screen.__init__(self, clock)
         
         
-    def find_view_rect(self):
+    def find_view_rect(self, windowsize):
         """Create the largest rectangle of the same ratio as basesize, with
         a maximum of maxsize on both axes."""
-        ww, wh = self.windowsize
+        ww, wh = windowsize
         bw, bh = self.basesize
         mw, mh = self.maxsize
         mult = min(ww * mw / bw, wh * mh / bh)
@@ -39,6 +40,14 @@ class Menu(Screen):
         left, top = (ww - width) / 2, (wh - height) / 2
         
         return left, top, width, height
+    
+    
+    def on_resize(self):
+        # redraw the background
+        self.background = pygame.Surface(self.view.get_size())
+        self.background.fill((255, 255, 255))
+        
+        self.redraw = True
 
 
     def run_frame(self, elapsed, keys):
@@ -59,30 +68,46 @@ class Menu(Screen):
                 action = self.options[self.selected][0]
                 
                 if action == 'play':
-                    Game(self.window, self.levels).run()
+                    self.options = ([(i, 'Level ' + str(i + 1))
+                                     for i in range(len(self.levels))]
+                                    + [('back', 'Back')])
+                    self.selected = 0
                     self.redraw = True
                     
                 elif action == 'quit':
                     return 'quit'
+                
+                elif action == 'back':
+                    self.options = self.mainmenu
+                    self.selected = 0
+                    self.redraw = True
+                    
+                else:
+                    # start the game screen, skipping to the selected level
+                    Game(self.window, self.levels, action).run()
+                    self.options = self.mainmenu
+                    self.selected = 0
+                    self.redraw = True
             
     
     def draw_frame(self):
-        if self.resize_view():
-            # redraw the background and render the text
-            self.background = pygame.Surface(self.view.get_size())
-            self.background.fill((255, 255, 255))
-    
-            left, top = 50, 50
-            font = pygame.font.Font(None, self.fontheight)
-            for i, (_, text) in enumerate(self.options):
-                self.background.blit(font.render(text, True, (0, 0, 0)),
-                                     (left, top + self.fontheight * i))
-            self.redraw = True
-
         if self.redraw:
-            # blit the background and the marker onto the view
-            left, top = 15, 55
+            # blit the background, text and marker onto the view
             self.view.blit(self.background, (0, 0))
-            self.view.blit(self.marker, (left, top + self.fontheight * self.selected))
+            
+            maxsize = 50
+            minsize = 20
+            fontsize = next(size for size in range(maxsize, minsize - 1, -1)
+                            if size * len(self.options) < self.view.get_height()
+                            or size == minsize)
+            
+            left, top = 50, 0
+            font = pygame.font.Font(None, fontsize)
+            for i, (_, text) in enumerate(self.options):
+                self.view.blit(font.render(text, True, (0, 0, 0)),
+                                     (left, top + fontsize * i))
+            left, top = 15, 5
+            self.view.blit(self.marker, (left, top + fontsize * self.selected))
+            
             self.redraw = False
 

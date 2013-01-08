@@ -24,17 +24,26 @@ class Game(Screen):
         Screen.__init__(self, window)
         
         
-    def find_view_rect(self):
+    def find_view_rect(self, windowsize):
         """Set the cell size to create the largest possible rectangle with
         the same ratio as viewcells."""
         # init view of proper size within the window
-        ww, wh = self.windowsize
+        ww, wh = windowsize
         vw, vh = self.viewcells
         self.cellsize = min(ww / vw, wh / vh)        
         width, height = vw * self.cellsize, vh * self.cellsize
         left, top = int((ww - width) / 2), int((wh - height) / 2)
         
         return left, top, width, height
+        
+        
+    def on_resize(self):
+        """Resize the tileset, and redraw the entire level."""
+        # init tileset
+        tilew, tileh = self.tiledims
+        self.tileset = pygame.transform.scale(self.tileimg.convert_alpha(),
+                                              (tilew * self.cellsize, tileh * self.cellsize))
+        self.level.redraw = True
         
         
     def run_frame(self, elapsed, keys):
@@ -81,9 +90,6 @@ class Game(Screen):
                 
         for sprite in self.level.sprites:
             sprite.end_turn()
-            
-        # draw the frame again
-        self.draw_frame()
 
 
     def _advance_level(self):
@@ -98,14 +104,6 @@ class Game(Screen):
         
     def draw_frame(self):
         """Draw a frame at the current state of the level."""
-        # check for window resize
-        if self.resize_view():
-            # init tileset
-            tilew, tileh = self.tiledims
-            self.tileset = pygame.transform.scale(self.tileimg.convert_alpha(),
-                                                  (tilew * self.cellsize, tileh * self.cellsize))
-            self.level.redraw = True
-
         # redraw cells
         if self.level.redraw:
             # draw entire level background

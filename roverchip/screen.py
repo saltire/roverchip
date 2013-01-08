@@ -8,19 +8,17 @@ class Screen:
         """Draws the initial frame. Make sure to initialize any variables needed
         to draw before calling this method from a subclass."""
         self.window = window
-        self.windowsize = None
-
-        # draw the initial frame
-        self.draw_frame()
-        pygame.display.update()
-        self.window.clock.tick(60)
+        self.last_windowsize = None
         
         
     def run(self):
         """Run this screen, checking status after each frame."""
         while True:
-            # update clock
-            elapsed = float(self.window.clock.get_time())
+            # update display and tick the clock
+            self.resize_view()
+            self.draw_frame()
+            pygame.display.update()
+            elapsed = float(self.window.clock.tick(60))
             
             keys = []
             for event in pygame.event.get():
@@ -42,11 +40,6 @@ class Screen:
             if self.run_frame(elapsed, keys) == 'quit':
                 return
             
-            # update display and tick the clock
-            self.draw_frame()
-            pygame.display.update()
-            self.window.clock.tick(60)
-        
         
     def run_frame(self, elapsed, keys):
         """Run a single frame for this type of screen."""
@@ -58,20 +51,22 @@ class Screen:
         the view and any elements within that need to be resized."""
         # check if the window size has changed
         windowsize = self.window.view.get_size()
-        if self.windowsize == windowsize:
-            return False
+        if windowsize != self.last_windowsize:
+            self.last_windowsize = windowsize
         
-        self.windowsize = windowsize
-        
-        # initialize view using rect from child class
-        self.view = self.window.view.subsurface(self.find_view_rect())
-        
-        return True
+            # initialize view using rect from child class, run hook
+            self.view = self.window.view.subsurface(self.find_view_rect(windowsize))
+            self.on_resize()
         
         
-    def get_view_rect(self):
+    def get_view_rect(self, windowsize):
         """Return the rect of the main view for this screen."""
         return 0, 0, 0, 0
+    
+    
+    def on_resize(self):
+        """A hook that runs whenever the view is resized."""
+        pass
 
 
         

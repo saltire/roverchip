@@ -50,7 +50,7 @@ class TiledMap:
 
     def __init__(self, pattern):
         """Parse all Tiled XML files matching the given pattern."""
-        self.levels_xml = (xml.parse(lfile) for lfile in glob.glob(pattern))
+        self.levels_xml = ((lfile.strip('.tmx'), xml.parse(lfile)) for lfile in glob.glob(pattern))
         
         
     def get_levels(self):
@@ -72,7 +72,7 @@ class TiledMap:
             return tiledata
         
         levels = []
-        for lxml in self.levels_xml:
+        for filename, lxml in self.levels_xml:
             width = int(lxml.getroot().get('width'))
             height = int(lxml.getroot().get('height'))
             layers = lxml.findall('layer')
