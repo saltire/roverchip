@@ -5,7 +5,7 @@ from screen import Screen
 
 
 class Menu(Screen):
-    def __init__(self, clock, levels):
+    def __init__(self, window, levels):
         # init subwindow
         self.basesize = 3, 2
         self.maxsize = .9, .9
@@ -26,7 +26,7 @@ class Menu(Screen):
         # init levels
         self.levels = levels
         
-        Screen.__init__(self, clock)
+        Screen.__init__(self, window)
         
         
     def find_view_rect(self, windowsize):
@@ -84,7 +84,7 @@ class Menu(Screen):
                     
                 else:
                     # start the game screen, skipping to the selected level
-                    Game(self.window, self.levels, action).run()
+                    self.window.run(Game(self.window, self.levels, action))
                     self.options = self.mainmenu
                     self.selected = 0
                     self.redraw = True

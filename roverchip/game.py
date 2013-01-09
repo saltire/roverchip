@@ -75,6 +75,10 @@ class Game(Screen):
             elif keydown and key == pygame.K_RETURN:
                 if self._advance_level() is False:
                     return 'quit'
+            
+            # quit on esc
+            elif keydown and key == pygame.K_ESCAPE:
+                return 'quit'
                 
         # run hooks for all sprites in layer order
         for sprite in self.level.sprites:
