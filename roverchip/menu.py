@@ -29,20 +29,18 @@ class Menu(Screen):
         Screen.__init__(self, window)
         
         
-    def find_view_rect(self, windowsize):
-        """Create the largest rectangle of the same ratio as basesize, with
-        a maximum of maxsize on both axes."""
-        ww, wh = windowsize
+    def resize_view(self, size):
+        """Resize the view and redraw the background."""
+        # find the largest rectangle with the same ratio as basesize,
+        # and a maximum of maxsize on either axis.
+        ww, wh = size
         bw, bh = self.basesize
         mw, mh = self.maxsize
         mult = min(ww * mw / bw, wh * mh / bh)
         width, height = bw * mult, bh * mult
         left, top = (ww - width) / 2, (wh - height) / 2
+        self.view = self.window.view.subsurface((left, top, width, height))
         
-        return left, top, width, height
-    
-    
-    def on_resize(self):
         # redraw the background
         self.background = pygame.Surface(self.view.get_size())
         self.background.fill((255, 255, 255))

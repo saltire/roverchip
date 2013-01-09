@@ -24,21 +24,16 @@ class Game(Screen):
         Screen.__init__(self, window)
         
         
-    def find_view_rect(self, windowsize):
-        """Set the cell size to create the largest possible rectangle with
-        the same ratio as viewcells."""
-        # init view of proper size within the window
-        ww, wh = windowsize
+    def resize_view(self, size):
+        """Set cell size, and resize the view and the tileset."""
+        # find the largest rectangle with the same ratio as viewcells
+        ww, wh = size
         vw, vh = self.viewcells
         self.cellsize = min(ww / vw, wh / vh)        
         width, height = vw * self.cellsize, vh * self.cellsize
         left, top = int((ww - width) / 2), int((wh - height) / 2)
+        self.view = self.window.view.subsurface((left, top, width, height))
         
-        return left, top, width, height
-        
-        
-    def on_resize(self):
-        """Resize the tileset, and redraw the entire level."""
         # init tileset
         tilew, tileh = self.tiledims
         self.tileset = pygame.transform.scale(self.tileimg.convert_alpha(),
@@ -76,7 +71,7 @@ class Game(Screen):
                 if self._advance_level() is False:
                     return 'quit'
             
-            # quit on esc
+            # quit to menu
             elif keydown and key == pygame.K_ESCAPE:
                 return 'quit'
                 
@@ -141,6 +136,4 @@ class Game(Screen):
         # update sprite positions, draw sprites, update display
         self.level.sprites.update(self.cellsize, (left, top), self.tileset)
         self.level.sprites.draw(self.view)
-        
-        
 
