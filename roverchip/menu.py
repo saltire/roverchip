@@ -35,7 +35,7 @@ class Menu(Screen):
         
         
     def resize_view(self, size):
-        """Resize the view and redraw the background."""
+        """Resize the view, redraw the background, reinit the font."""
         # find the largest rectangle with the same ratio as basesize,
         # and a maximum of maxsize on either axis.
         ww, wh = size
@@ -77,7 +77,38 @@ class Menu(Screen):
         self.redraw = True
 
 
+    def draw_frame(self):
+        """Draw the visible columns of options on the screen, and the marker."""
+        if self.redraw:
+            # blit the background, text and marker onto the view
+            self.view.blit(self.background, (0, 0))
+            
+            fheight = self.font.get_height()
+            colwidth = self.textarea.get_width() / self.cols
+            
+            row = self.selected % self.rows
+            col = self.selected / self.rows
+            # adjust offset to within (self.cols) of col
+            self.col_offset = min(col, max(self.col_offset, col - self.cols + 1))
+            options = self.options[self.col_offset * self.rows:
+                                   (self.col_offset + self.cols) * self.rows]
+            
+            for i, (_, text) in enumerate(options):
+                # blit text onto its row, indenting by fheight
+                self.textarea.blit(self.font.render(text, True, (0, 0, 0)),
+                                   (i / self.rows * colwidth + fheight,
+                                    i % self.rows * self.rheight))
+            
+            # blit marker
+            mmargin = self.font.get_height() / 4
+            self.textarea.blit(self.marker, ((col - self.col_offset) * colwidth + mmargin,
+                                             row * self.rheight + mmargin))
+            
+            self.redraw = False
+
+
     def run_frame(self, elapsed, keys):
+        """Scan for keystrokes and either switch menus or take actions."""
         for key, keydown in keys:
             # arrow keys: change selection
             if keydown and key in self.arrow_keys:
@@ -110,8 +141,7 @@ class Menu(Screen):
                     if value == 'play':
                         self.menu = 'levels'
                         self.options = [(i, 'Level ' + str(i + 1))
-                                        for i in range(30)]
-                                        #for i in range(len(self.levels))]
+                                        for i in range(len(self.levels))]
                         self.selected = 0
                         self.redraw = True
                         
@@ -139,32 +169,3 @@ class Menu(Screen):
                     self.selected = 0
                     self.redraw = True
                 
-
-    def draw_frame(self):
-        if self.redraw:
-            # blit the background, text and marker onto the view
-            self.view.blit(self.background, (0, 0))
-            
-            fheight = self.font.get_height()
-            colwidth = self.textarea.get_width() / self.cols
-            
-            row = self.selected % self.rows
-            col = self.selected / self.rows
-            # adjust offset to within (self.cols) of col
-            self.col_offset = min(col, max(self.col_offset, col - self.cols + 1))
-            options = self.options[self.col_offset * self.rows:
-                                   (self.col_offset + self.cols) * self.rows]
-            
-            for i, (_, text) in enumerate(options):
-                # blit text onto its row, indenting by fheight
-                self.textarea.blit(self.font.render(text, True, (0, 0, 0)),
-                                   (i / self.rows * colwidth + fheight,
-                                    i % self.rows * self.rheight))
-            
-            # blit marker
-            mmargin = self.font.get_height() / 4
-            self.textarea.blit(self.marker, ((col - self.col_offset) * colwidth + mmargin,
-                                             row * self.rheight + mmargin))
-            
-            self.redraw = False
-

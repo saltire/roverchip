@@ -41,66 +41,6 @@ class Game(Screen):
         self.level.redraw = True
         
         
-    def run_frame(self, elapsed, keys):
-        """Run a single frame for this level."""
-        # check collisions
-        for sprite in self.level.sprites:
-            sprite.check_collisions()
-
-        # check for death -> reset level
-        if (not self.level.player.alive()
-            or any(not rover.alive() for rover in self.level.get_sprites('Rover'))):
-            self.level = Level(*self.leveldata[self.current_level])
-        
-        # check for win condition -> advance level, or quit if last level
-        if self.level.player.done_level():
-            if self._advance_level() is False:
-                return 'quit'
-
-        # handle events
-        for key, keydown in keys:
-            # move controls
-            if keydown and key in self.move_keys:
-                self.level.player.move_key_down(self.move_keys.index(key))
-                    
-            elif not keydown and key in self.move_keys:
-                self.level.player.move_key_up(self.move_keys.index(key))
-            
-            # skip level, or quit if last level
-            elif keydown and key == pygame.K_RETURN:
-                if self._advance_level() is False:
-                    return 'quit'
-            
-            # quit to menu
-            elif keydown and key == pygame.K_ESCAPE:
-                return 'quit'
-                
-        # run hooks for all sprites in layer order
-        for sprite in self.level.sprites:
-            sprite.start_turn()
-            
-        for sprite in self.level.sprites:
-            sprite.do_move(elapsed)
-            
-        for sprite in self.level.sprites:
-            if sprite.new_cell:
-                sprite.after_move()
-                sprite.new_cell = False
-                
-        for sprite in self.level.sprites:
-            sprite.end_turn()
-
-
-    def _advance_level(self):
-        """Get the next level, or return False if there is no next level."""
-        try:
-            self.current_level += 1
-            self.level = Level(*self.leveldata[self.current_level])
-            
-        except IndexError:
-            return False
-        
-        
     def draw_frame(self):
         """Draw a frame at the current state of the level."""
         # redraw cells
@@ -136,4 +76,62 @@ class Game(Screen):
         # update sprite positions, draw sprites, update display
         self.level.sprites.update(self.cellsize, (left, top), self.tileset)
         self.level.sprites.draw(self.view)
+        
+        
+    def run_frame(self, elapsed, keys):
+        """Run a single frame for this level."""
+        def advance_level():
+            # get the next level, or return false if there is none
+            try:
+                self.current_level += 1
+                self.level = Level(*self.leveldata[self.current_level])
+            except IndexError:
+                return False
+        
+        # check collisions
+        for sprite in self.level.sprites:
+            sprite.check_collisions()
+
+        # check for death -> reset level
+        if (not self.level.player.alive()
+            or any(not rover.alive() for rover in self.level.get_sprites('Rover'))):
+            self.level = Level(*self.leveldata[self.current_level])
+        
+        # check for win condition -> advance level, or quit if last level
+        if self.level.player.done_level():
+            if advance_level() is False:
+                return 'quit'
+
+        # handle events
+        for key, keydown in keys:
+            # move controls
+            if keydown and key in self.move_keys:
+                self.level.player.move_key_down(self.move_keys.index(key))
+                    
+            elif not keydown and key in self.move_keys:
+                self.level.player.move_key_up(self.move_keys.index(key))
+            
+            # skip level, or quit if last level
+            elif keydown and key == pygame.K_RETURN:
+                if advance_level() is False:
+                    return 'quit'
+            
+            # quit to menu
+            elif keydown and key == pygame.K_ESCAPE:
+                return 'quit'
+                
+        # run hooks for all sprites in layer order
+        for sprite in self.level.sprites:
+            sprite.start_turn()
+            
+        for sprite in self.level.sprites:
+            sprite.do_move(elapsed)
+            
+        for sprite in self.level.sprites:
+            if sprite.new_cell:
+                sprite.after_move()
+                sprite.new_cell = False
+                
+        for sprite in self.level.sprites:
+            sprite.end_turn()
 
