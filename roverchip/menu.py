@@ -1,5 +1,8 @@
+import os
+
 import pygame
 
+from font import Font
 from game import Game
 from screen import Screen
 
@@ -7,17 +10,22 @@ from screen import Screen
 class Menu(Screen):
     arrow_keys = pygame.K_UP, pygame.K_RIGHT, pygame.K_DOWN, pygame.K_LEFT
 
-    def __init__(self, window, levels):
+    def __init__(self, window, levels, fontpath='font.png', fontsize=(8, 8)):
         # subwindow properties
+        self.backcolor = 255, 255, 255
         self.basesize = 3, 2
         self.margin = 0.05, 0.05
         self.textmargin = 0.05, 0.1
         
         # text properties
+        self.font = Font(os.path.join(window.path, fontpath), fontsize)
+        self.color = 0, 0, 0
         self.maxrows = 8
-        self.maxsize = 100
-        self.minsize = 30
+        self.maxsize = 96
+        self.minsize = 32
         self.cols = 2
+        self.kernpct = 0.125
+        self.leadpct = 0.4
         
         # init menu options
         self.menu = 'main'
@@ -48,7 +56,7 @@ class Menu(Screen):
         
         # redraw the background
         self.background = pygame.Surface(self.view.get_size())
-        self.background.fill((255, 255, 255))
+        self.background.fill(self.backcolor)
         
         # create text area
         tmx, tmy = self.textmargin
@@ -57,20 +65,24 @@ class Menu(Screen):
         self.textarea = self.view.subsurface((tleft, ttop, twidth, theight))
         
         # find biggest font size that will fit the max number of rows
-        # but without going under the min size
-        self.rheight = next(size for size in range(self.maxsize, self.minsize - 1, -1)
-                        if size * self.maxrows < self.textarea.get_height()
-                        or size == self.minsize)
-        self.font = pygame.font.Font(None, self.rheight)
+        # with the given leading, without going under the min size
+        for size in range(self.maxsize, self.minsize - 1, -1):
+            rowtotal = size * self.maxrows
+            leadtotal = int(size * self.leadpct) * (self.maxrows - 1)
+            if rowtotal + leadtotal < self.textarea.get_height():
+                break
+        self.fsize = size
+        self.leading = int(size * self.leadpct)
+        self.kerning = int(size * self.kernpct)
         
         # reduce the number of rows if font is at min size
         # and max rows still don't fit
         self.rows = next(num for num in range(self.maxrows, 0, -1)
-                         if num * self.rheight < self.textarea.get_height()
+                         if num * self.fsize < self.textarea.get_height()
                          or num == 1)
 
         # draw marker
-        msize = self.font.get_height() / 2
+        msize = self.fsize / 2
         self.marker = pygame.Surface((msize, msize))
         self.marker.fill((255, 0, 0))
 
@@ -83,26 +95,28 @@ class Menu(Screen):
             # blit the background, text and marker onto the view
             self.view.blit(self.background, (0, 0))
             
-            fheight = self.font.get_height()
             colwidth = self.textarea.get_width() / self.cols
             
-            row = self.selected % self.rows
-            col = self.selected / self.rows
-            # adjust offset to within (self.cols) of col
-            self.col_offset = min(col, max(self.col_offset, col - self.cols + 1))
-            options = self.options[self.col_offset * self.rows:
-                                   (self.col_offset + self.cols) * self.rows]
+            srow = self.selected % self.rows
+            scol = self.selected / self.rows
             
-            for i, (_, text) in enumerate(options):
-                # blit text onto its row, indenting by fheight
-                self.textarea.blit(self.font.render(text, True, (0, 0, 0)),
-                                   (i / self.rows * colwidth + fheight,
-                                    i % self.rows * self.rheight))
+            # adjust offset to within (self.cols) of col
+            self.col_offset = min(scol, max(self.col_offset, scol - self.cols + 1))
+            
+            # render and blit each column of text that is showing
+            for col in range(self.col_offset, self.col_offset + self.cols):
+                options = self.options[col * self.rows:(col + 1) * self.rows]
+                if not options:
+                    break
+                
+                colfont = self.font.render('\n'.join(text for _, text in options),
+                                           self.fsize, self.leading, self.kerning, self.color)
+                self.textarea.blit(colfont, ((col - self.col_offset) * colwidth + self.fsize, 0))
             
             # blit marker
-            mmargin = self.font.get_height() / 4
-            self.textarea.blit(self.marker, ((col - self.col_offset) * colwidth + mmargin,
-                                             row * self.rheight + mmargin))
+            mmargin = self.fsize / 4
+            self.textarea.blit(self.marker, ((scol - self.col_offset) * colwidth + mmargin,
+                                             srow * (self.fsize + self.leading) + mmargin))
             
             self.redraw = False
 
