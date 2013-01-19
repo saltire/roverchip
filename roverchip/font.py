@@ -28,40 +28,61 @@ class Font:
                 self.chars[char] = charimg
     
     
-    def render(self, text, lineheight=None, leading=0, kerning=0, color=None):
+    def render(self, text, lineheight=None, leading=0, kerning=1, color=None):
         """Return a surface containing a graphical rendering of the text.
         If lineheight is passed, scale the characters to that height.
-        Color will replace all colours, keeping alpha unchanged."""
-        chars = {char: self.chars[char] for char in
-                 set(char for char in text.replace('\n', ''))}
-        
-        if color is not None:
-            for charimg in chars.itervalues():
-                # replace RGB channels with those from color
-                pix = pygame.surfarray.pixels3d(charimg)
-                pix[:,:,0], pix[:,:,1], pix[:,:,2] = color
-                del(pix)
+        Color will replace all colours, keeping alpha unchanged.
+        Takes a string or a list of strings (formatting the characters once)."""
+        # return the glyphs for each unique character in a block of text
+        def format_chars(text):
+            chars = {char: self.chars[char] for char in set(text.replace('\n', ''))}
+            scale = 1.0 if lineheight is None else float(lineheight) / self.height
             
-        if lineheight is None:
-            lineheight = self.height
-        else:
-            # scale up each character to the line height
-            scale = float(lineheight) / self.height
             for char, charimg in chars.iteritems():
-                charwidth = int(charimg.get_width() * scale)
-                chars[char] = pygame.transform.scale(charimg, (charwidth, lineheight))
-                            
-        text = text.split('\n')
-        width = max(sum(chars[char].get_width() + kerning for char in line)
-                    - kerning
-                    for line in text)
-        height = (lineheight + leading) * len(text) - leading
-        canvas = pygame.Surface((width, height), pygame.SRCALPHA)
-        
-        for y, line in enumerate(text):
-            x = 0
-            for char in line:
-                canvas.blit(chars[char], (x, y * (lineheight + leading)))
-                x += chars[char].get_width() + kerning
+                if color is not None:
+                    # replace RGB channels with those from color
+                    pix = pygame.surfarray.pixels3d(charimg)
+                    pix[:,:,0], pix[:,:,1], pix[:,:,2] = color
+                    del(pix)
+                    
+                if leading > 0 or kerning > 0:
+                    # replace the character surface with a larger one
+                    chars[char] = pygame.Surface((charimg.get_width() + kerning,
+                                                  charimg.get_height() + leading),
+                                                 pygame.SRCALPHA)
+                    chars[char].blit(charimg, (0, 0))
                 
-        return canvas
+                if scale != 1.0:
+                    # scale character to the line height
+                    charwidth = int(chars[char].get_width() * scale)
+                    chars[char] = pygame.transform.scale(chars[char],
+                                                         (charwidth, int(lineheight)))
+                    
+            return chars
+        
+        # render the block of text using the given glyphs
+        def render_text(text, chars):
+            text = text.split('\n')
+            width = max(sum(chars[char].get_width() for char in line)
+                        for line in text)
+            height = (lineheight + leading) * len(text) - leading
+            canvas = pygame.Surface((width, height), pygame.SRCALPHA)
+            
+            for y, line in enumerate(text):
+                x = 0
+                for char in line:
+                    canvas.blit(chars[char], (x, y * (lineheight + leading)))
+                    x += chars[char].get_width()
+                    
+            return canvas
+        
+        if isinstance(text, str):
+            # render a string
+            return render_text(text, format_chars(text))
+        
+        else:
+            # format all characters at once and render multiple strings
+            chars = format_chars(''.join(text))
+            return [render_text(t, chars) for t in text]
+        
+
