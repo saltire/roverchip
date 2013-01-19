@@ -34,16 +34,11 @@ class Window:
         if w < mw or h < mh:
             size = self.min_size
                 
-        last_size = self.view.get_size() if hasattr(self, 'view') else None
-        
-        # init view
+        # init view, repaint background and run screen hook
         self.view = pygame.display.set_mode(size, pygame.RESIZABLE)
-        
-        # if resized, repaint background and run screen hook
-        if size != last_size:
-            self.view.fill((0, 0, 0))
-            for screen in self.screens:
-                screen.resize_view(size)
+        self.view.fill((0, 0, 0))
+        for screen in self.screens:
+            screen.resize_view(size)
         
         
     def run(self, screen):

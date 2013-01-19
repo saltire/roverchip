@@ -177,11 +177,9 @@ class Menu(Screen):
             # escape key: quit menu
             elif keydown and key == pygame.K_ESCAPE:
                 if self.menu == 'main':
-                    print 'quitting'
                     return 'quit'
                 
                 elif self.menu == 'levels':
-                    print 'yikes'
                     self.menu = 'main'
                     self.options = self.mainmenu
                     self.selected = 0
