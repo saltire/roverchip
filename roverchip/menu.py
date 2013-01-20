@@ -10,7 +10,7 @@ from screen import Screen
 class Menu(Screen):
     arrow_keys = pygame.K_UP, pygame.K_RIGHT, pygame.K_DOWN, pygame.K_LEFT
 
-    def __init__(self, window, levels, fontpath='font.png', fontsize=(8, 8)):
+    def __init__(self, window, fontpath='font.png', fontsize=(8, 8)):
         # menu properties
         self.backcolor = 255, 255, 255  # background colour
         self.basesize = 3, 2            # ratio of window width to height
@@ -27,17 +27,9 @@ class Menu(Screen):
         self.cols = 2           # number of text columns
         self.leadpct = 0.4      # line spacing, relative to font height
         
-        # init menu options
-        self.menu = 'main'
-        self.mainmenu = [('play', 'Play Game'),
-                         ('quit', 'Quit Game'),
-                         ]
-        self.options = self.mainmenu
+        # init menu display
         self.selected = 0
         self.col_offset = 0
-        
-        # init levels
-        self.levels = levels
         
         Screen.__init__(self, window)
         
@@ -109,7 +101,7 @@ class Menu(Screen):
             # render and blit each line of text in each column that is showing
             options = self.options[self.rows * self.col_offset:
                                    self.rows * (self.col_offset + self.cols)]
-            optfonts = self.font.render([text for _, text in options],
+            optfonts = self.font.render([option[0] for option in options],
                                         self.fsize, color=self.color)
             
             for i, optfont in enumerate(optfonts):
@@ -153,35 +145,34 @@ class Menu(Screen):
                     
             # enter key: act on selection value
             elif keydown and key == pygame.K_RETURN:
-                value = self.options[self.selected][0]
+                screen, args = self.options[self.selected][1:]
                 
-                if self.menu == 'main':
-                    if value == 'play':
-                        self.menu = 'levels'
-                        self.options = [(i, 'Level ' + str(i + 1))
-                                        for i in range(len(self.levels))]
-                        self.selected = 0
-                        self.redraw = True
-                        
-                    elif value == 'quit':
-                        return 'quit'
+                if not screen:
+                    return 'quit'
                 
-                elif self.menu == 'levels':
-                    # start the game screen, skipping to the selected level
-                    self.window.run(Game(self.window, self.levels, value))
-                    self.menu = 'main'
-                    self.options = self.mainmenu
-                    self.selected = 0
-                    self.redraw = True
+                self.window.run(screen(self.window, *args))
+                self.selected = 0
+                self.redraw = True
             
             # escape key: quit menu
             elif keydown and key == pygame.K_ESCAPE:
-                if self.menu == 'main':
-                    return 'quit'
+                return 'quit'
                 
-                elif self.menu == 'levels':
-                    self.menu = 'main'
-                    self.options = self.mainmenu
-                    self.selected = 0
-                    self.redraw = True
-                
+
+
+class MainMenu(Menu):
+    def __init__(self, window, leveldata, fontpath='font.png', fontsize=(8, 8)):
+        self.options = [('Play Game', LevelSelect, (leveldata, fontpath, fontsize)),
+                        ('Quit Game', False, ()),
+                        ]
+        Menu.__init__(self, window, fontpath, fontsize)
+
+
+
+class LevelSelect(Menu):
+    def __init__(self, window, leveldata, fontpath='font.png', fontsize=(8, 8)):
+        self.options = [('Level ' + str(i + 1), Game, (leveldata, i))
+                        for i in range(len(leveldata))]
+        Menu.__init__(self, window, fontpath, fontsize)
+
+        

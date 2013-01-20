@@ -3,7 +3,7 @@ import sys
 
 import pygame
 
-from menu import Menu
+from menu import MainMenu
 from tiledmap import TiledMap
 
 
@@ -23,7 +23,7 @@ class Window:
 
         # init levels and run the menu screen
         levels = TiledMap(os.path.join(self.path, levelpath)).get_levels()
-        self.run(Menu(self, levels))
+        self.run(MainMenu(self, levels))
     
     
     def init_window(self, size):
