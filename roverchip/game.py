@@ -9,7 +9,7 @@ from screen import Screen
 class Game(Screen):
     move_keys = pygame.K_UP, pygame.K_RIGHT, pygame.K_DOWN, pygame.K_LEFT
         
-    def __init__(self, window, leveldata, lskip=0, tilepath='tiles.png', tilesize=16):
+    def __init__(self, window, leveldata, lskip=0):
         self.viewcells = 10, 6  # size of the view in cells
         
         # init levels
@@ -18,8 +18,10 @@ class Game(Screen):
         self.level = Level(*self.leveldata[self.current_level])
         
         # init sprite tileset
-        self.tileimg = pygame.image.load(os.path.join(window.path, tilepath))
-        self.tiledims = self.tileimg.get_width() / tilesize, self.tileimg.get_height() / tilesize
+        self.tileimg = pygame.image.load(os.path.join(window.path,
+                                                      window.config.get('tilepath')))
+        tw, th = window.config.getints('tilesize')
+        self.tiledims = self.tileimg.get_width() / tw, self.tileimg.get_height() / th
         
         Screen.__init__(self, window)
         

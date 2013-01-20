@@ -8,25 +8,13 @@ from screen import Screen
 
 
 class Menu(Screen):
-    arrow_keys = pygame.K_UP, pygame.K_RIGHT, pygame.K_DOWN, pygame.K_LEFT
-
-    def __init__(self, window, fontpath='font.png', fontsize=(8, 8)):
-        # menu properties
-        self.backcolor = 255, 255, 255  # background colour
-        self.basesize = 3, 2            # ratio of window width to height
-        self.margin = 0.05, 0.05        # size of margin around menu on screen
-        self.textmargin = 0.05, 0.1     # size of margin around text on menu
-        
+    def __init__(self, window):
         # text properties
+        fontpath = window.config.get('fontpath')
+        fontsize = window.config.getints('fontsize')
         self.font = Font(os.path.join(window.path, fontpath), fontsize)
-        self.color = 0, 0, 0    # colour of the font
-        self.maxrows = 8        # maximum rows of text on screen
-        self.maxsize = 96       # largest possible font size
-        self.minsize = 8        # smallest possible font size
-        self.sizestep = 8       # amount to decrement font size
-        self.cols = 2           # number of text columns
-        self.leadpct = 0.4      # line spacing, relative to font height
-        
+        self.fontcolor = window.config.getints('menufontcolor')
+
         # init menu display
         self.selected = 0
         self.col_offset = 0
@@ -39,8 +27,8 @@ class Menu(Screen):
         # find the largest rectangle with the same ratio as basesize,
         # and a maximum of maxsize on either axis.
         ww, wh = size
-        bw, bh = self.basesize
-        mx, my = self.margin
+        bw, bh = self.window.config.getints('menuratio')
+        mx, my = self.window.config.getfloats('menumargin')
         mult = min(ww * (1 - mx * 2) / bw, wh * (1 - my * 2) / bh)
         width, height = bw * mult, bh * mult
         left, top = (ww - width) / 2, (wh - height) / 2
@@ -48,33 +36,38 @@ class Menu(Screen):
         
         # redraw the background
         self.background = pygame.Surface(self.view.get_size())
-        self.background.fill(self.backcolor)
+        self.background.fill(self.window.config.getints('menubackcolor'))
         
         # create text area
-        tmx, tmy = self.textmargin
+        tmx, tmy = self.window.config.getfloats('textmargin')
         tleft, ttop = tmx * width, tmy * height
         twidth, theight = width - tleft * 2, height - ttop * 2
         self.textarea = self.view.subsurface((tleft, ttop, twidth, theight))
         
         # find biggest font size that will fit the max number of rows
         # with the given leading, without going under the min size
-        for size in range(self.maxsize, self.minsize - 1, -self.sizestep):
-            rowtotal = size * self.maxrows
-            leadtotal = int(size * self.leadpct) * (self.maxrows - 1)
+        maxrows = self.window.config.getint('maxrows')
+        maxsize = self.window.config.getint('maxfontsize')
+        minsize = self.window.config.getint('minfontsize')
+        sizestep = self.window.config.getint('sizestep')
+        leadpct = self.window.config.getfloat('leadpct')
+        for size in range(maxsize, minsize - 1, -sizestep):
+            rowtotal = size * maxrows
+            leadtotal = int(size * leadpct) * (maxrows - 1)
             if rowtotal + leadtotal <= self.textarea.get_height():
-                rows = self.maxrows
+                rows = maxrows
                 break
             
             # if no size in range fits, start reducing number of rows
-            if size == self.minsize:
-                for rows in range(self.maxrows - 1, 0, -1):
+            if size == minsize:
+                for rows in range(maxrows - 1, 0, -1):
                     rowtotal = size * rows
                     if rowtotal + leadtotal <= self.textarea.get_height():
                         break
         
         self.fsize = size
         self.rows = rows
-        self.leading = int(size * self.leadpct)
+        self.leading = int(size * leadpct)
         
         # draw marker
         msize = self.fsize / 2
@@ -90,19 +83,20 @@ class Menu(Screen):
             # blit the background, text and marker onto the view
             self.view.blit(self.background, (0, 0))
             
-            colwidth = self.textarea.get_width() / self.cols
+            columns = self.window.config.getint('columns')
+            colwidth = self.textarea.get_width() / columns
             
             srow = self.selected % self.rows
             scol = self.selected / self.rows
             
-            # adjust offset to within (self.cols) of col
-            self.col_offset = min(scol, max(self.col_offset, scol - self.cols + 1))
+            # adjust offset to within (columns) of col
+            self.col_offset = min(scol, max(self.col_offset, scol - columns + 1))
             
             # render and blit each line of text in each column that is showing
             options = self.options[self.rows * self.col_offset:
-                                   self.rows * (self.col_offset + self.cols)]
+                                   self.rows * (self.col_offset + columns)]
             optfonts = self.font.render([option[0] for option in options],
-                                        self.fsize, color=self.color)
+                                        self.fsize, color=self.fontcolor)
             
             for i, optfont in enumerate(optfonts):
                 pos = (i / self.rows * colwidth + self.fsize,
@@ -121,7 +115,8 @@ class Menu(Screen):
         """Scan for keystrokes and either switch menus or take actions."""
         for key, keydown in keys:
             # arrow keys: change selection
-            if keydown and key in self.arrow_keys:
+            if keydown and key in (pygame.K_UP, pygame.K_RIGHT,
+                                   pygame.K_DOWN, pygame.K_LEFT):
                 col = self.selected / self.rows
                 totalcols = (len(self.options) + self.rows - 1) / self.rows
                 old_selected = self.selected
@@ -150,6 +145,7 @@ class Menu(Screen):
                 if not screen:
                     return 'quit'
                 
+                print screen, len(args)
                 self.window.run(screen(self.window, *args))
                 self.selected = 0
                 self.redraw = True
@@ -161,18 +157,18 @@ class Menu(Screen):
 
 
 class MainMenu(Menu):
-    def __init__(self, window, leveldata, fontpath='font.png', fontsize=(8, 8)):
-        self.options = [('Play Game', LevelSelect, (leveldata, fontpath, fontsize)),
+    def __init__(self, window, leveldata):
+        self.options = [('Play Game', LevelSelect, (leveldata,)),
                         ('Quit Game', False, ()),
                         ]
-        Menu.__init__(self, window, fontpath, fontsize)
+        Menu.__init__(self, window)
 
 
 
 class LevelSelect(Menu):
-    def __init__(self, window, leveldata, fontpath='font.png', fontsize=(8, 8)):
+    def __init__(self, window, leveldata):
         self.options = [('Level ' + str(i + 1), Game, (leveldata, i))
                         for i in range(len(leveldata))]
-        Menu.__init__(self, window, fontpath, fontsize)
+        Menu.__init__(self, window)
 
         
