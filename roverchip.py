@@ -1,3 +1,4 @@
+import glob
 import os
 
 import pygame
@@ -13,8 +14,6 @@ if __name__ == '__main__':
     pygame.init()
     pygame.key.set_repeat(1, config.keyrepeat)
     
-    levels = TiledMap(config.levelpath).get_levels()
+    levels = [TiledMap(lfile) for lfile in glob.glob(config.levelpath)]
     
-    window = Window(config.windowsize)
-    window.run(MainMenu(window, levels))
-    
+    Window(config.windowsize).run(MainMenu(levels))

@@ -1,4 +1,3 @@
-import glob
 import xml.etree.ElementTree as xml
 
 
@@ -48,15 +47,14 @@ class TiledMap:
              (4, 6): ('Tank', '', 2),
              }
 
-    def __init__(self, pattern):
-        """Parse all Tiled XML files matching the given pattern."""
-        self.levels_xml = ((lfile.strip('.tmx'), xml.parse(lfile)) for lfile in glob.glob(pattern))
-        
-        
-    def get_levels(self):
-        """For each file passed, get cell data from the first layer
-        and sprite data from the rest, and instantiate a level."""
-        
+    def __init__(self, lfile):
+        """Parse the Tiled XML file, then get cell data from the first layer
+        and sprite data from the rest."""
+        lxml = xml.parse(lfile)
+        width = int(lxml.getroot().get('width'))
+        height = int(lxml.getroot().get('height'))
+        layers = lxml.findall('layer')
+                
         def get_tile_data(layer, width, height):
             layerdata = layer.find('data').text.split(',')
             tiledata = {}
@@ -71,23 +69,12 @@ class TiledMap:
                                                              for i in tiletype[1:]))
             return tiledata
         
-        levels = []
-        for filename, lxml in self.levels_xml:
-            width = int(lxml.getroot().get('width'))
-            height = int(lxml.getroot().get('height'))
-            layers = lxml.findall('layer')
-            
-            # interpret bottom layer as tiles            
-            celldata = get_tile_data(layers[0], width, height)
-            
-            # interpret all subsequent layers as sprites
-            spritedata = []
-            for layer in layers[1:]:
-                spritetiles = get_tile_data(layer, width, height)    
-                spritedata.extend((pos, stype, sdata) for pos, (stype, sdata) in spritetiles.items())
-            
-            levels.append((celldata, spritedata))
-
-        return levels
+        # interpret bottom layer as tiles            
+        self.cells = get_tile_data(layers[0], width, height)
         
-        
+        # interpret all subsequent layers as sprites
+        self.sprites = []
+        for layer in layers[1:]:
+            spritetiles = get_tile_data(layer, width, height)    
+            self.sprites.extend((pos, stype, sdata)
+                                for pos, (stype, sdata) in spritetiles.items())

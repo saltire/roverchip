@@ -11,28 +11,26 @@ from tileset import Tileset
 class Game(Screen):
     move_keys = pygame.K_UP, pygame.K_RIGHT, pygame.K_DOWN, pygame.K_LEFT
         
-    def __init__(self, window, leveldata, lskip=0):
+    def __init__(self, leveldata, lskip=0):
         self.viewcells = 10, 6  # size of the view in cells
         
         # init levels
         self.leveldata = leveldata
         self.current_level = lskip
-        self.level = Level(*self.leveldata[self.current_level])
+        self.level = Level(self.leveldata[self.current_level])
         
         self.tileset = Tileset(config.tilepath, config.tilesize)
         
-        Screen.__init__(self, window)
         
-        
-    def resize_view(self, size):
+    def resize_view(self):
         """Set cell size, and resize the view and the tileset."""
         # find the largest rectangle with the same ratio as viewcells
-        ww, wh = size
+        ww, wh = self.window_view.get_size()
         vw, vh = self.viewcells
         self.cellsize = min(ww / vw, wh / vh)        
         width, height = vw * self.cellsize, vh * self.cellsize
         left, top = int((ww - width) / 2), int((wh - height) / 2)
-        self.view = self.window.view.subsurface((left, top, width, height))
+        self.view = self.window_view.subsurface((left, top, width, height))
         
         self.tileset.init_tileset(self.cellsize)
 
@@ -82,7 +80,7 @@ class Game(Screen):
             # get the next level, or return false if there is none
             try:
                 self.current_level += 1
-                self.level = Level(*self.leveldata[self.current_level])
+                self.level = Level(self.leveldata[self.current_level])
             except IndexError:
                 return False
         
@@ -93,7 +91,7 @@ class Game(Screen):
         # check for death -> reset level
         if (not self.level.player.alive()
             or any(not rover.alive() for rover in self.level.get_sprites('Rover'))):
-            self.level = Level(*self.leveldata[self.current_level])
+            self.level = Level(self.leveldata[self.current_level])
         
         # check for win condition -> advance level, or quit if last level
         if self.level.player.done_level():

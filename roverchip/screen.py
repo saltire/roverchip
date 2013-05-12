@@ -1,9 +1,13 @@
 class Screen:
-    def __init__(self, window):
-        """Draws the initial frame. Make sure to initialize any variables needed
-        to draw before calling this method from a subclass."""
-        self.window = window
-        self.resize_view(window.view.get_size())
+    def __init__(self):
+        pass
+        
+        
+    def set_view(self, view):
+        """Store the window's view, from which to create subsurfaces. Then
+        call the resize view hook."""
+        self.window_view = view
+        self.resize_view()
         
         
     def resize_view(self):

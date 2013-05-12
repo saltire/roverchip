@@ -5,14 +5,14 @@ from sprites import spritetypes
 
 
 class Level:
-    def __init__(self, celldata, spritedata):
+    def __init__(self, leveldata):
         """Initialize all the cells and sprites, and add them to groups."""
         self.redraw = True
         self.redraw_cells = set()
         
         # init map cells
         self.cells = {}
-        for pos, (ctype, cdata) in celldata.items():
+        for pos, (ctype, cdata) in leveldata.cells.items():
             self.cells[pos] = celltypes[ctype](self, pos, *cdata)
         
         self.width = len(set(x for x, _ in self.cells))
@@ -28,7 +28,7 @@ class Level:
         self.items = pygame.sprite.Group()          # can be picked up by player
         self.beams = pygame.sprite.Group()          # beams emitted by lasers
         
-        for pos, stype, sdata in spritedata:
+        for pos, stype, sdata in leveldata.sprites:
             sprite = spritetypes[stype](self, pos, *sdata)
             self.sprites.add(sprite, layer=sprite.layer)
 

@@ -9,27 +9,25 @@ from screen import Screen
 
 
 class Menu(Screen):
-    def __init__(self, window):
+    def __init__(self):
         self.font = Font(config.menufontpath, config.menufontsize)
 
         # init menu display
         self.selected = 0
         self.col_offset = 0
         
-        Screen.__init__(self, window)
         
-        
-    def resize_view(self, size):
+    def resize_view(self):
         """Resize the view, redraw the background, reinit the font."""
         # find the largest rectangle with the same ratio as basesize,
         # and a maximum of maxsize on either axis.
-        ww, wh = size
+        ww, wh = self.window_view.get_size()
         bw, bh = config.menuratio
         mx, my = config.menumargin
         mult = min(ww * (1 - mx * 2) / bw, wh * (1 - my * 2) / bh)
         width, height = bw * mult, bh * mult
         left, top = (ww - width) / 2, (wh - height) / 2
-        self.view = self.window.view.subsurface((left, top, width, height))
+        self.view = self.window_view.subsurface((left, top, width, height))
         
         # redraw the background
         self.background = pygame.Surface(self.view.get_size())
@@ -139,7 +137,7 @@ class Menu(Screen):
                 
                 self.selected = 0
                 self.redraw = True
-                return screen(self.window, *args)
+                return screen(*args)
             
             # escape key: quit menu
             elif keydown and key == pygame.K_ESCAPE:
@@ -148,18 +146,18 @@ class Menu(Screen):
 
 
 class MainMenu(Menu):
-    def __init__(self, window, leveldata):
+    def __init__(self, leveldata):
         self.options = [('Play Game', LevelSelect, [leveldata]),
                         ('Quit Game', False, ()),
                         ]
-        Menu.__init__(self, window)
+        Menu.__init__(self)
 
 
 
 class LevelSelect(Menu):
-    def __init__(self, window, leveldata):
+    def __init__(self, leveldata):
         self.options = [('Level ' + str(i + 1), Game, [leveldata, i])
                         for i in range(len(leveldata))]
-        Menu.__init__(self, window)
+        Menu.__init__(self)
 
         
