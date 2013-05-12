@@ -20,10 +20,7 @@ class Cell:
     
     def draw(self, cellsize, tileset):
         """Draw the cell."""
-        tx, ty = self.tile
-        tileimg = tileset.subsurface((tx * cellsize, ty * cellsize, cellsize, cellsize))
-        if self.rotate != 0:
-            tileimg = pygame.transform.rotate(tileimg, self.rotate * -90)
+        tileimg = tileset.get_tile(self.tile, self.rotate)
         return tileimg
     
 

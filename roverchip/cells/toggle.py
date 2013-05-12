@@ -17,11 +17,9 @@ class Toggle(Cell):
         
     def draw(self, cellsize, tileset):
         """Draw either a floor or a wall, with the toggle border added."""
-        tx, ty = self.on_tile if self.state else self.off_tile
-        tileimg = tileset.subsurface((tx * cellsize, ty * cellsize, cellsize, cellsize)).copy()
-        # add border tile
-        tx, ty = self.tile
-        borderimg = tileset.subsurface((tx * cellsize, ty * cellsize, cellsize, cellsize))
+        tile = self.on_tile if self.state else self.off_tile
+        tileimg = tileset.get_tile(tile).copy()
+        borderimg = tileset.get_tile(self.tile)
         tileimg.blit(borderimg, (0, 0))
         return tileimg
     

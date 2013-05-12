@@ -15,11 +15,8 @@ class ChipDoor(Cell):
 
     def draw(self, cellsize, tileset):
         """Draw the ice tile, then draw the rotated corner on top of it."""
-        tx, ty = self.floor_tile
-        tileimg = tileset.subsurface((tx * cellsize, ty * cellsize, cellsize, cellsize)).copy()
-        
-        tx, ty = self.tile
-        doorimg = tileset.subsurface((tx * cellsize, ty * cellsize, cellsize, cellsize))
+        tileimg = tileset.get_tile(self.floor_tile).copy()
+        doorimg = tileset.get_tile(self.tile)
         tileimg.blit(doorimg, (0, 0))
         
         return tileimg

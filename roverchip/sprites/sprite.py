@@ -73,12 +73,8 @@ class Sprite(pygame.sprite.Sprite):
         if (not hasattr(self, 'image') or cellsize != self.image.get_width()
             or self.tile_facing != self.facing):
             
-            # grab tile from tileset
-            tx, ty = self.tile
-            tileimg = tileset.subsurface((tx * cellsize, ty * cellsize, cellsize, cellsize))
-            
-            # rotate and scale tile
-            tileimg = pygame.transform.rotate(tileimg, self.facing * -90)
+            # grab tile from tileset, rotate and scale
+            tileimg = tileset.get_tile(self.tile, self.facing)
             self.tile_facing = self.facing
             
             if self.size != 1:

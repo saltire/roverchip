@@ -5,6 +5,7 @@ import pygame
 import config
 from level import Level
 from screen import Screen
+from tileset import Tileset
 
 
 class Game(Screen):
@@ -18,10 +19,7 @@ class Game(Screen):
         self.current_level = lskip
         self.level = Level(*self.leveldata[self.current_level])
         
-        # init sprite tileset
-        self.tileimg = pygame.image.load(config.tilepath)
-        tw, th = config.tilesize
-        self.tiledims = self.tileimg.get_width() / tw, self.tileimg.get_height() / th
+        self.tileset = Tileset(config.tilepath, config.tilesize)
         
         Screen.__init__(self, window)
         
@@ -36,10 +34,8 @@ class Game(Screen):
         left, top = int((ww - width) / 2), int((wh - height) / 2)
         self.view = self.window.view.subsurface((left, top, width, height))
         
-        # init tileset
-        tilew, tileh = self.tiledims
-        self.tileset = pygame.transform.scale(self.tileimg.convert_alpha(),
-                                              (tilew * self.cellsize, tileh * self.cellsize))
+        self.tileset.init_tileset(self.cellsize)
+
         self.level.redraw = True
         
         

@@ -19,13 +19,10 @@ class Ice(Cell):
         
     def draw(self, cellsize, tileset):
         """Draw the ice tile, then draw the rotated corner on top of it."""
-        tx, ty = self.tile
-        tileimg = tileset.subsurface((tx * cellsize, ty * cellsize, cellsize, cellsize)).copy()
+        tileimg = tileset.get_tile(self.tile).copy()
         if self.facing is not None:
             # draw corner tile on top of ice tile
-            tx, ty = self.corner_tile
-            cornerimg = tileset.subsurface((tx * cellsize, ty * cellsize, cellsize, cellsize))
-            cornerimg = pygame.transform.rotate(cornerimg, self.facing * -90)              
+            cornerimg = tileset.get_tile(self.corner_tile, self.facing)
             tileimg.blit(cornerimg, (0, 0))
         return tileimg
         
