@@ -2,6 +2,7 @@ import os
 
 import pygame
 
+import config
 from level import Level
 from screen import Screen
 
@@ -18,9 +19,8 @@ class Game(Screen):
         self.level = Level(*self.leveldata[self.current_level])
         
         # init sprite tileset
-        self.tileimg = pygame.image.load(os.path.join(window.path,
-                                                      window.config.get('tilepath')))
-        tw, th = window.config.getints('tilesize')
+        self.tileimg = pygame.image.load(config.tilepath)
+        tw, th = config.tilesize
         self.tiledims = self.tileimg.get_width() / tw, self.tileimg.get_height() / th
         
         Screen.__init__(self, window)
@@ -102,7 +102,7 @@ class Game(Screen):
         # check for win condition -> advance level, or quit if last level
         if self.level.player.done_level():
             if advance_level() is False:
-                return 'quit'
+                return False
 
         # handle events
         for key, keydown in keys:
@@ -116,11 +116,11 @@ class Game(Screen):
             # skip level, or quit if last level
             elif keydown and key == pygame.K_RETURN:
                 if advance_level() is False:
-                    return 'quit'
+                    return False
             
             # quit to menu
             elif keydown and key == pygame.K_ESCAPE:
-                return 'quit'
+                return False
                 
         # run hooks for all sprites in layer order
         for sprite in self.level.sprites:

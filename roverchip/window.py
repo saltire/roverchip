@@ -1,52 +1,37 @@
-import os
 import sys
 
 import pygame
 
-from config import Config
-from menu import MainMenu
-from tiledmap import TiledMap
+import config
 
 
 class Window:
-    def __init__(self, configpath='config'):
+    def __init__(self, size):
         # init config
-        self.path = os.path.dirname(__file__)
-        self.config = Config(os.path.join(self.path, configpath), 'roverchip')
-        
-        # init pygame variables
-        pygame.init()
-        pygame.key.set_repeat(1, self.config.getint('keyrepeat'))
         self.clock = pygame.time.Clock()
-        
-        # init screens and window
         self.screens = []
-        self.init_window(self.config.getints('windowsize'))
 
-        # init levels and run the menu screen
-        levelpath = self.config.get('levelpath')
-        levels = TiledMap(os.path.join(self.path, levelpath)).get_levels()
-        self.run(MainMenu(self, levels))
+        self.init_window(size)
     
     
     def init_window(self, size):
         """Initialize the game window. Called at beginning, and every time
         the window is resized."""            
         # enforce minimum size
-        minsize = self.config.getints('minsize')
-        (mw, mh), (w, h) = minsize, size
+        (mw, mh), (w, h) = config.minsize, size
         if w < mw or h < mh:
-            size = minsize
+            size = mw, mh
                 
         # init view, repaint background and run screen hook
         self.view = pygame.display.set_mode(size, pygame.RESIZABLE)
         for screen in self.screens:
-            screen.resize_view(size)
+            screen.set_view(self.view)
         
         
     def run(self, screen):
         """Run this screen, checking status after each frame."""
         self.screens.append(screen)
+        screen.set_view(self.view)
         
         while True:
             # update display and tick the clock
@@ -71,8 +56,15 @@ class Window:
                     keys.append((event.key, 0))
                     
             # run a frame of this screen
-            if screen.run_frame(elapsed, keys) == 'quit':
+            nextscreen = screen.run_frame(elapsed, keys)
+            
+            if nextscreen is False:
+                # return to the previous screen on the stack
                 self.screens.pop()
                 return
+            
+            elif nextscreen is not None:
+                # add a new screen to the stack
+                self.run(nextscreen)
             
         

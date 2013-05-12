@@ -2,6 +2,7 @@ import os
 
 import pygame
 
+import config
 from font import Font
 from game import Game
 from screen import Screen
@@ -9,11 +10,7 @@ from screen import Screen
 
 class Menu(Screen):
     def __init__(self, window):
-        # text properties
-        fontpath = window.config.get('fontpath')
-        fontsize = window.config.getints('fontsize')
-        self.font = Font(os.path.join(window.path, fontpath), fontsize)
-        self.fontcolor = window.config.getints('menufontcolor')
+        self.font = Font(config.menufontpath, config.menufontsize)
 
         # init menu display
         self.selected = 0
@@ -27,8 +24,8 @@ class Menu(Screen):
         # find the largest rectangle with the same ratio as basesize,
         # and a maximum of maxsize on either axis.
         ww, wh = size
-        bw, bh = self.window.config.getints('menuratio')
-        mx, my = self.window.config.getfloats('menumargin')
+        bw, bh = config.menuratio
+        mx, my = config.menumargin
         mult = min(ww * (1 - mx * 2) / bw, wh * (1 - my * 2) / bh)
         width, height = bw * mult, bh * mult
         left, top = (ww - width) / 2, (wh - height) / 2
@@ -36,38 +33,33 @@ class Menu(Screen):
         
         # redraw the background
         self.background = pygame.Surface(self.view.get_size())
-        self.background.fill(self.window.config.getints('menubackcolor'))
+        self.background.fill(config.menubackcolor)
         
         # create text area
-        tmx, tmy = self.window.config.getfloats('textmargin')
+        tmx, tmy = config.menumargin
         tleft, ttop = tmx * width, tmy * height
         twidth, theight = width - tleft * 2, height - ttop * 2
         self.textarea = self.view.subsurface((tleft, ttop, twidth, theight))
         
         # find biggest font size that will fit the max number of rows
         # with the given leading, without going under the min size
-        maxrows = self.window.config.getint('maxrows')
-        maxsize = self.window.config.getint('maxfontsize')
-        minsize = self.window.config.getint('minfontsize')
-        sizestep = self.window.config.getint('sizestep')
-        leadpct = self.window.config.getfloat('leadpct')
-        for size in range(maxsize, minsize - 1, -sizestep):
-            rowtotal = size * maxrows
-            leadtotal = int(size * leadpct) * (maxrows - 1)
+        for size in range(config.maxfontsize, config.minfontsize - 1, -config.sizestep):
+            rowtotal = size * config.maxrows
+            leadtotal = int(size * config.leadpct) * (config.maxrows - 1)
             if rowtotal + leadtotal <= self.textarea.get_height():
-                rows = maxrows
+                rows = config.maxrows
                 break
             
             # if no size in range fits, start reducing number of rows
-            if size == minsize:
-                for rows in range(maxrows - 1, 0, -1):
+            if size == config.minfontsize:
+                for rows in range(config.maxrows - 1, 0, -1):
                     rowtotal = size * rows
                     if rowtotal + leadtotal <= self.textarea.get_height():
                         break
         
         self.fsize = size
         self.rows = rows
-        self.leading = int(size * leadpct)
+        self.leading = int(size * config.leadpct)
         
         # draw marker
         msize = self.fsize / 2
@@ -83,7 +75,7 @@ class Menu(Screen):
             # blit the background, text and marker onto the view
             self.view.blit(self.background, (0, 0))
             
-            columns = self.window.config.getint('columns')
+            columns = config.columns
             colwidth = self.textarea.get_width() / columns
             
             srow = self.selected % self.rows
@@ -96,7 +88,7 @@ class Menu(Screen):
             options = self.options[self.rows * self.col_offset:
                                    self.rows * (self.col_offset + columns)]
             optfonts = self.font.render([option[0] for option in options],
-                                        self.fsize, color=self.fontcolor)
+                                        self.fsize, color=config.menufontcolor)
             
             for i, optfont in enumerate(optfonts):
                 pos = (i / self.rows * colwidth + self.fsize,
@@ -138,27 +130,26 @@ class Menu(Screen):
                 if self.selected != old_selected:
                     self.redraw = True
                     
-            # enter key: act on selection value
+            # enter key: open selected screen or quit this menu
             elif keydown and key == pygame.K_RETURN:
                 screen, args = self.options[self.selected][1:]
                 
                 if not screen:
-                    return 'quit'
+                    return False
                 
-                print screen, len(args)
-                self.window.run(screen(self.window, *args))
                 self.selected = 0
                 self.redraw = True
+                return screen(self.window, *args)
             
             # escape key: quit menu
             elif keydown and key == pygame.K_ESCAPE:
-                return 'quit'
+                return False
                 
 
 
 class MainMenu(Menu):
     def __init__(self, window, leveldata):
-        self.options = [('Play Game', LevelSelect, (leveldata,)),
+        self.options = [('Play Game', LevelSelect, [leveldata]),
                         ('Quit Game', False, ()),
                         ]
         Menu.__init__(self, window)
@@ -167,7 +158,7 @@ class MainMenu(Menu):
 
 class LevelSelect(Menu):
     def __init__(self, window, leveldata):
-        self.options = [('Level ' + str(i + 1), Game, (leveldata, i))
+        self.options = [('Level ' + str(i + 1), Game, [leveldata, i])
                         for i in range(len(leveldata))]
         Menu.__init__(self, window)
 
