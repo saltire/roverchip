@@ -36,6 +36,23 @@ class Level:
                 self.player = sprite
                 
         
+    # success/failure
+    
+    def check_for_success(self):
+        """Check to see if level has been completed."""
+        return (len(self.player.cells_in()) == 1
+                and self.cells[self.player.pos].get_type() == 'Exit'
+                and all(self.player.following.has(rover)
+                        for rover in self.get_sprites('Rover'))
+                and not self.get_sprites('Chip'))
+    
+    
+    def check_for_failure(self):
+        """Check to see if level has been failed."""
+        return (not self.player.alive()
+                or any(not rover.alive() for rover in self.get_sprites('Rover')))
+
+
     # cell data
     
     def get_cell(self, pos):

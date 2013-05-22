@@ -139,14 +139,6 @@ class Player(Sprite):
             self.start_move()
                 
                     
-    def done_level(self):
-        """Check to see if the level has been completed."""
-        return (len(self.cells_in()) == 1
-                and self.level.get_cell(self.pos).get_type() == 'Exit'
-                and all(self.following.has(rover) for rover in self.level.get_sprites('Rover'))
-                and not self.level.get_sprites('Chip'))
-        
-        
     def get_carried_items(self, itype=None, colour=None):
         """Return all items that the player is carrying."""
         return [item for item in self.inv

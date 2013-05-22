@@ -1,5 +1,3 @@
-import os
-
 import pygame
 
 import config
@@ -77,9 +75,9 @@ class Game(Screen):
     def run_frame(self, elapsed, keys):
         """Run a single frame for this level."""
         def advance_level():
-            # get the next level, or return false if there is none
+            # start the next level, or return false if there is none
+            self.current_level += 1
             try:
-                self.current_level += 1
                 self.level = Level(self.leveldata[self.current_level])
             except IndexError:
                 return False
@@ -89,12 +87,11 @@ class Game(Screen):
             sprite.check_collisions()
 
         # check for death -> reset level
-        if (not self.level.player.alive()
-            or any(not rover.alive() for rover in self.level.get_sprites('Rover'))):
+        if self.level.check_for_failure():
             self.level = Level(self.leveldata[self.current_level])
         
         # check for win condition -> advance level, or quit if last level
-        if self.level.player.done_level():
+        if self.level.check_for_success():
             if advance_level() is False:
                 return False
 
